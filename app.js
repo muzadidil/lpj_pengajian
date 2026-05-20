@@ -1,34 +1,14 @@
 /* ==========================================
    TPQ AL-MAIDAH KARANGSONO - Application Logic
-   Extracted from inline <script> block
-   ==========================================
-
-   NOTE — BACKEND INTEGRATION POINTS (Google Apps Script -> Firebase)
-   The functions below currently call the Google Apps Script bridge
-   `google.script.run.<fn>()`. These will NOT work on GitHub Pages.
-   Replace each of the following calls with a Firebase equivalent
-   (Firestore SDK or Cloud Functions) in the next migration step:
-
-     - getDropdownData()        -> read "KATEGORI" collection
-     - getDataPanitia()         -> read panitia source collection
-     - simpanData(payload)      -> write to "pengeluaran" collection
-     - simpanPemasukan(payload) -> write to "pemasukan" collection
-     - simpanSusunan(payload)   -> write to "susunan_panitia" collection
-     - getSusunanPanitia(params)-> query "susunan_panitia" collection
-     - getRiwayatData(params)   -> query "pengeluaran" collection
-     - getLPJData()             -> aggregate pemasukan + pengeluaran
-
-   Each call uses the .withSuccessHandler / .withFailureHandler pattern.
-   When migrating, keep the response shape identical:
-     { status: 'success', ... } | { status: 'error', message: '...' }
-   so the UI rendering code below does not need to change.
+   Data calls now go through the `Api` object (see js/firebase.js).
+   Rendering, tabs, and PDF generation are unchanged.
    ========================================== */
 
 lucide.createIcons();
 
 // ===== DROPDOWN LOADING =====
 function loadDropdowns() {
-  google.script.run.withSuccessHandler((res) => {
+  Api.getDropdownData().then((res) => {
     if (res.status === 'success') {
       const elSatuan = document.getElementById('harga');
       const elKategori = document.getElementById('jenis');
@@ -44,10 +24,9 @@ function loadDropdowns() {
         elFilterKat.innerHTML += `<option value="${k}">${k}</option>`;
       });
     }
-  }).getDropdownData();
+  });
 
-  // Load names & roles for the Panitia form and filter
-  google.script.run.withSuccessHandler((res) => {
+  Api.getDataPanitia().then((res) => {
     if (res.status === 'success') {
       const elNama = document.getElementById('namaAnggota');
       const elJabatan = document.getElementById('jabatanPanitia');
@@ -63,7 +42,7 @@ function loadDropdowns() {
         elFilterJabatan.innerHTML += `<option value="${j}">${j}</option>`;
       });
     }
-  }).getDataPanitia();
+  });
 }
 
 loadDropdowns();
@@ -85,7 +64,7 @@ function switchTab(tabId) {
     "min-w-[90px] py-2.5 px-2 text-[11px] font-bold bg-[#e6f0ff] text-[#003399] rounded-xl transition-all shadow-sm";
 
   if (tabId === 'riwayat') fetchRiwayat();
-  if (tabId === 'panitia') fetchPanitia(); // auto refresh panitia list
+  if (tabId === 'panitia') fetchPanitia();
 }
 
 // ===== FORM: PENGELUARAN =====
@@ -102,25 +81,29 @@ function handleSubmit(e) {
     qty: document.getElementById('qty').value,
     jenis: document.getElementById('jenis').value
   };
-  btnSubmit.disabled = true;
-  btnText.classList.add('hidden');
-  loading.classList.remove('hidden');
-  google.script.run.withSuccessHandler((res) => {
+
+  const resetBtn = () => {
     btnSubmit.disabled = false;
     btnText.classList.remove('hidden');
     loading.classList.add('hidden');
+  };
+
+  btnSubmit.disabled = true;
+  btnText.classList.add('hidden');
+  loading.classList.remove('hidden');
+
+  Api.simpanData(payload).then((res) => {
+    resetBtn();
     if (res.status === 'success') {
       openModal();
       document.getElementById('bcaForm').reset();
     } else {
       alert('Gagal: ' + res.message);
     }
-  }).withFailureHandler((err) => {
-    btnSubmit.disabled = false;
-    btnText.classList.remove('hidden');
-    loading.classList.add('hidden');
+  }).catch((err) => {
+    resetBtn();
     alert('Error: ' + err);
-  }).simpanData(payload);
+  });
 }
 
 // ===== FORM: PEMASUKAN =====
@@ -134,25 +117,29 @@ function handlePemasukan(e) {
     nominal: document.getElementById('nominalPemasukan').value,
     keterangan: document.getElementById('ketPemasukan').value
   };
-  btnSubmit.disabled = true;
-  btnText.classList.add('hidden');
-  loading.classList.remove('hidden');
-  google.script.run.withSuccessHandler((res) => {
+
+  const resetBtn = () => {
     btnSubmit.disabled = false;
     btnText.classList.remove('hidden');
     loading.classList.add('hidden');
+  };
+
+  btnSubmit.disabled = true;
+  btnText.classList.add('hidden');
+  loading.classList.remove('hidden');
+
+  Api.simpanPemasukan(payload).then((res) => {
+    resetBtn();
     if (res.status === 'success') {
       openModal();
       document.getElementById('pemasukanForm').reset();
     } else {
       alert('Gagal: ' + res.message);
     }
-  }).withFailureHandler((err) => {
-    btnSubmit.disabled = false;
-    btnText.classList.remove('hidden');
-    loading.classList.add('hidden');
+  }).catch((err) => {
+    resetBtn();
     alert('Error: ' + err);
-  }).simpanPemasukan(payload);
+  });
 }
 
 // ===== FORM: PANITIA =====
@@ -165,26 +152,30 @@ function handlePanitia(e) {
     jabatan: document.getElementById('jabatanPanitia').value,
     nama: document.getElementById('namaAnggota').value
   };
+
+  const resetBtn = () => {
+    btnSubmit.disabled = false;
+    btnText.classList.remove('hidden');
+    loading.classList.add('hidden');
+  };
+
   btnSubmit.disabled = true;
   btnText.classList.add('hidden');
   loading.classList.remove('hidden');
-  google.script.run.withSuccessHandler((res) => {
-    btnSubmit.disabled = false;
-    btnText.classList.remove('hidden');
-    loading.classList.add('hidden');
+
+  Api.simpanSusunan(payload).then((res) => {
+    resetBtn();
     if (res.status === 'success') {
       openModal();
       document.getElementById('panitiaForm').reset();
-      fetchPanitia(); // auto refresh after save
+      fetchPanitia();
     } else {
       alert('Gagal: ' + res.message);
     }
-  }).withFailureHandler((err) => {
-    btnSubmit.disabled = false;
-    btnText.classList.remove('hidden');
-    loading.classList.add('hidden');
+  }).catch((err) => {
+    resetBtn();
     alert('Error: ' + err);
-  }).simpanSusunan(payload);
+  });
 }
 
 // ===== PANITIA LIST =====
@@ -206,7 +197,7 @@ function fetchPanitia() {
 
   const params = { search: paramSearch, jabatan: paramJabatan };
 
-  google.script.run.withSuccessHandler((res) => {
+  Api.getSusunanPanitia(params).then((res) => {
     loadingEl.classList.add('hidden');
     loadingEl.classList.remove('flex');
     if (res.status === 'success') {
@@ -215,11 +206,11 @@ function fetchPanitia() {
     } else {
       listEl.innerHTML = `<p class="text-xs text-red-500 text-center py-4">Gagal memuat: ${res.message}</p>`;
     }
-  }).withFailureHandler((err) => {
+  }).catch((err) => {
     loadingEl.classList.add('hidden');
     loadingEl.classList.remove('flex');
     listEl.innerHTML = `<p class="text-xs text-red-500 text-center py-4">Sistem Error: ${err}</p>`;
-  }).getSusunanPanitia(params);
+  });
 }
 
 function tampilkanDataPanitia(dataArray) {
@@ -264,7 +255,7 @@ function fetchRiwayat() {
 
   const params = { search: paramSearch, kategori: paramKategori, limit: parseInt(paramLimit) };
 
-  google.script.run.withSuccessHandler((res) => {
+  Api.getRiwayatData(params).then((res) => {
     loadingEl.classList.add('hidden');
     loadingEl.classList.remove('flex');
     if (res.status === 'success') {
@@ -273,11 +264,11 @@ function fetchRiwayat() {
     } else {
       listEl.innerHTML = `<p class="text-xs text-red-500 text-center py-4">Gagal memuat: ${res.message}</p>`;
     }
-  }).withFailureHandler((err) => {
+  }).catch((err) => {
     loadingEl.classList.add('hidden');
     loadingEl.classList.remove('flex');
     listEl.innerHTML = `<p class="text-xs text-red-500 text-center py-4">Sistem Error: ${err}</p>`;
-  }).getRiwayatData(params);
+  });
 }
 
 function tampilkanDataRiwayat(dataArray) {
@@ -325,25 +316,28 @@ function printLPJ() {
   const btn = document.getElementById('btnPrint');
   const text = document.getElementById('btnTextPrint');
   const load = document.getElementById('loadingPrint');
+
+  const resetBtn = () => {
+    btn.disabled = false;
+    text.classList.remove('hidden');
+    load.classList.add('hidden');
+  };
+
   btn.disabled = true;
   text.classList.add('hidden');
   load.classList.remove('hidden');
 
-  google.script.run.withSuccessHandler((res) => {
-    btn.disabled = false;
-    text.classList.remove('hidden');
-    load.classList.add('hidden');
+  Api.getLPJData().then((res) => {
+    resetBtn();
     if (res.status === 'success') {
       generatePDFLayout(res.data);
     } else {
       alert('Gagal mengambil data LPJ: ' + res.message);
     }
-  }).withFailureHandler((err) => {
-    btn.disabled = false;
-    text.classList.remove('hidden');
-    load.classList.add('hidden');
+  }).catch((err) => {
+    resetBtn();
     alert('System Error: ' + err);
-  }).getLPJData();
+  });
 }
 
 function generatePDFLayout(data) {
