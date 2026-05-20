@@ -250,11 +250,14 @@ const Api = {
   async getLPJData() {
     try {
       await authReady;
-      const [pengSnap, pemSnap, strSnap] = await Promise.all([
+      const [pengSnap, pemSnap, strSnap, adminSnap] = await Promise.all([
         db.ref('pengeluaran').once('value'),
         db.ref('pemasukan').once('value'),
-        db.ref('struktur').once('value')
+        db.ref('struktur').once('value'),
+        db.ref('admin/config').once('value')
       ]);
+      const adminCfg = adminSnap.val() || {};
+      const lpjInfo = adminCfg.lpjInfo || {};
 
       const peng = pengSnap.val() || {};
       const pem = pemSnap.val() || {};
@@ -294,7 +297,12 @@ const Api = {
           totalPemasukan: totalPemasukan,
           totalPengeluaran: totalPengeluaran,
           saldo: totalPemasukan - totalPengeluaran,
-          struktur: struktur
+          struktur: struktur,
+          lpjInfo: {
+            lembaga: lpjInfo.lembaga || 'TPQ AL-MAIDAH KARANGSONO',
+            alamat: lpjInfo.alamat || '',
+            kegiatan: lpjInfo.kegiatan || 'WISUDA SANTRI'
+          }
         }
       };
     } catch (e) {
@@ -343,6 +351,47 @@ const Api = {
       return { status: 'success' };
     } catch (e) {
       return { status: 'error', message: logError('updateMasterList', e).message };
+    }
+  },
+
+  // 13. Admin: get all panitia records with their Firebase keys
+  async getAllPanitiaRecords() {
+    try {
+      await authReady;
+      const snap = await db.ref('panitia').once('value');
+      const val = snap.val() || {};
+      const list = Object.keys(val).map(k => ({
+        key: k,
+        jabatan: val[k].jabatan || '-',
+        nama: val[k].nama || '-',
+        waktu: val[k].waktu || 0
+      }));
+      list.sort((a, b) => b.waktu - a.waktu);
+      return { status: 'success', data: list };
+    } catch (e) {
+      return { status: 'error', data: [], message: logError('getAllPanitiaRecords', e).message };
+    }
+  },
+
+  // 14. Admin: update jabatan of a panitia record
+  async updatePanitiaJabatan(key, jabatan) {
+    try {
+      await authReady;
+      await db.ref('panitia/' + key + '/jabatan').set(clean(jabatan, 50));
+      return { status: 'success' };
+    } catch (e) {
+      return { status: 'error', message: logError('updatePanitiaJabatan', e).message };
+    }
+  },
+
+  // 15. Admin: delete a panitia record
+  async deletePanitia(key) {
+    try {
+      await authReady;
+      await db.ref('panitia/' + key).remove();
+      return { status: 'success' };
+    } catch (e) {
+      return { status: 'error', message: logError('deletePanitia', e).message };
     }
   }
 };

@@ -51,7 +51,7 @@
     "panitia": {
       ".read": "auth != null",
       "$id": {
-        ".write": "auth != null && !data.exists()",
+        ".write": "auth != null",
         ".validate": "newData.hasChildren(['jabatan', 'nama'])",
         "jabatan":  { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 50" },
         "nama":     { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 100" },

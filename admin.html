@@ -56,6 +56,7 @@
         <button id="tab-btn-menu" onclick="showSection('menu')" class="active-tab flex-1 py-2.5 px-2 text-[11px] font-bold rounded-xl transition-all">Menu</button>
         <button id="tab-btn-kategori" onclick="showSection('kategori')" class="flex-1 py-2.5 px-2 text-[11px] font-bold text-gray-500 hover:bg-gray-50 rounded-xl transition-all">Kategori</button>
         <button id="tab-btn-panitia" onclick="showSection('panitia')" class="flex-1 py-2.5 px-2 text-[11px] font-bold text-gray-500 hover:bg-gray-50 rounded-xl transition-all">Panitia</button>
+        <button id="tab-btn-lpj" onclick="showSection('lpj')" class="flex-1 py-2.5 px-2 text-[11px] font-bold text-gray-500 hover:bg-gray-50 rounded-xl transition-all">LPJ</button>
         <button id="tab-btn-pin" onclick="showSection('pin')" class="flex-1 py-2.5 px-2 text-[11px] font-bold text-gray-500 hover:bg-gray-50 rounded-xl transition-all">PIN</button>
       </div>
 
@@ -147,20 +148,36 @@
       <!-- Section: Panitia -->
       <div id="section-panitia" class="hidden glass-card rounded-3xl p-6 max-w-md mx-auto">
         <div class="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
-          <div class="p-2 bg-purple-50 rounded-lg"><i data-lucide="user-plus" class="w-5 h-5 text-purple-600"></i></div>
+          <div class="p-2 bg-purple-50 rounded-lg"><i data-lucide="users" class="w-5 h-5 text-purple-600"></i></div>
           <div>
-            <h2 class="text-gray-800 font-bold text-sm">DAFTAR NAMA PANITIA</h2>
-            <p class="text-[10px] text-gray-400">Kelola master nama panitia</p>
+            <h2 class="text-gray-800 font-bold text-sm">SUSUNAN PANITIA</h2>
+            <p class="text-[10px] text-gray-400">Edit jabatan atau hapus anggota</p>
           </div>
         </div>
-        <div class="flex gap-2 mb-4">
-          <input type="text" id="new-panitia" placeholder="Nama panitia baru..."
-            class="flex-1 bg-gray-50 px-4 py-3 rounded-2xl border border-gray-100 input-focus outline-none text-gray-700 font-medium placeholder:text-gray-300 text-sm uppercase">
-          <button onclick="addPanitia()" class="btn-add bg-purple-600 text-white font-bold rounded-2xl shadow-md btn-bounce">
-            <i data-lucide="plus" class="w-5 h-5"></i>
-          </button>
+
+        <!-- Header kolom -->
+        <div class="flex items-center gap-2 px-3 mb-2">
+          <span class="flex-1 text-[10px] font-bold text-gray-400 uppercase tracking-wider">Nama</span>
+          <span class="flex-1 text-[10px] font-bold text-gray-400 uppercase tracking-wider">Jabatan</span>
+          <span class="w-8"></span>
         </div>
-        <div id="panitia-master-list" class="space-y-2 max-h-[350px] overflow-y-auto pr-1"></div>
+
+        <div id="panitia-records-list" class="space-y-2 max-h-[300px] overflow-y-auto pr-1 mb-6">
+          <p class="text-xs text-gray-400 text-center py-4">Memuat data...</p>
+        </div>
+
+        <!-- Master Nama Panitia -->
+        <div class="border-t border-gray-100 pt-5">
+          <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Master Nama (Dropdown)</p>
+          <div class="flex gap-2 mb-3">
+            <input type="text" id="new-panitia" placeholder="Tambah nama baru..."
+              class="flex-1 bg-gray-50 px-4 py-3 rounded-2xl border border-gray-100 input-focus outline-none text-gray-700 font-medium placeholder:text-gray-300 text-sm uppercase">
+            <button onclick="addPanitia()" class="btn-add bg-purple-600 text-white font-bold rounded-2xl shadow-md btn-bounce">
+              <i data-lucide="plus" class="w-5 h-5"></i>
+            </button>
+          </div>
+          <div id="panitia-master-list" class="space-y-2 max-h-[200px] overflow-y-auto pr-1"></div>
+        </div>
       </div>
 
       <!-- Section: PIN -->
@@ -180,6 +197,37 @@
           <p id="pin-change-error" class="text-red-500 text-xs text-center hidden"></p>
           <button onclick="changePin()" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-4 rounded-2xl shadow-xl shadow-yellow-200 btn-bounce transition-all">
             Simpan PIN Baru
+          </button>
+        </div>
+      </div>
+
+      <!-- Section: LPJ Info -->
+      <div id="section-lpj" class="hidden glass-card rounded-3xl p-6 max-w-md mx-auto">
+        <div class="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
+          <div class="p-2 bg-blue-50 rounded-lg"><i data-lucide="file-text" class="w-5 h-5 text-[#003399]"></i></div>
+          <div>
+            <h2 class="text-gray-800 font-bold text-sm">INFO LAPORAN (LPJ)</h2>
+            <p class="text-[10px] text-gray-400">Header yang tampil di PDF cetakan</p>
+          </div>
+        </div>
+        <div class="space-y-4">
+          <div class="space-y-1">
+            <label class="text-[10px] font-bold text-gray-500 ml-1 uppercase tracking-wider">Nama Lembaga</label>
+            <input type="text" id="lpj-lembaga" placeholder="TPQ AL-MAIDAH KARANGSONO"
+              class="w-full bg-gray-50 px-4 py-3.5 rounded-2xl border border-gray-100 input-focus outline-none text-gray-700 font-medium text-sm">
+          </div>
+          <div class="space-y-1">
+            <label class="text-[10px] font-bold text-gray-500 ml-1 uppercase tracking-wider">Alamat</label>
+            <input type="text" id="lpj-alamat" placeholder="Karangsono, ..."
+              class="w-full bg-gray-50 px-4 py-3.5 rounded-2xl border border-gray-100 input-focus outline-none text-gray-700 font-medium text-sm">
+          </div>
+          <div class="space-y-1">
+            <label class="text-[10px] font-bold text-gray-500 ml-1 uppercase tracking-wider">Nama Kegiatan</label>
+            <input type="text" id="lpj-kegiatan" placeholder="WISUDA SANTRI"
+              class="w-full bg-gray-50 px-4 py-3.5 rounded-2xl border border-gray-100 input-focus outline-none text-gray-700 font-medium text-sm">
+          </div>
+          <button onclick="saveLpjInfo()" class="w-full bca-gradient text-white font-bold py-4 rounded-2xl shadow-xl shadow-blue-200 btn-bounce hover:brightness-110 transition-all">
+            Simpan Info LPJ
           </button>
         </div>
       </div>

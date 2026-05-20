@@ -378,7 +378,9 @@ function generatePDFLayout(data) {
        .sign-table td { border: none !important; text-align: center; vertical-align: bottom; }
   </style></head>
   <body>
-    <h2>LPJ KEUANGAN TPQ AL-MAIDAH<br>TAHUN ${tahun}</h2>
+    <h2>LAPORAN PERTANGGUNGJAWABAN KEUANGAN (LPJ)<br>${data.lpjInfo.lembaga}</h2>
+    <p style="text-align:center; font-size:13px; margin-top:-15px; margin-bottom:5px;">Kegiatan: ${data.lpjInfo.kegiatan} &nbsp;|&nbsp; Tahun ${tahun}</p>
+    ${data.lpjInfo.alamat ? `<p style="text-align:center; font-size:12px; color:#555; margin-bottom:20px;">Alamat: ${data.lpjInfo.alamat}</p>` : ''}
     <table class="summary-table" style="margin-bottom: 30px; margin-top: 30px;">
        <tr><td width="30%"><b>Total Pemasukan</b></td><td width="2%">:</td><td width="68%"><b>${formatRp(data.totalPemasukan)}</b></td></tr>
        <tr><td><b>Total Pengeluaran</b></td><td>:</td><td><b>${formatRp(data.totalPengeluaran)}</b></td></tr>

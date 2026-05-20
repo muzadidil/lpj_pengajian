@@ -7,6 +7,8 @@ lucide.createIcons();
 
 let adminConfig = {};
 let masterData = {};
+let panitiaRecords = [];
+let jabatanList = [];
 
 // ===== PIN HASHING =====
 async function hashPin(pin) {
@@ -65,16 +67,24 @@ document.getElementById('pin-input').addEventListener('keydown', e => {
 
 // ===== LOAD PANEL =====
 async function loadAdminPanel() {
-  const masterRes = await Api.getMasterData();
+  const [masterRes, panitiaRes] = await Promise.all([
+    Api.getMasterData(),
+    Api.getAllPanitiaRecords()
+  ]);
   masterData = (masterRes.data) || {};
+  panitiaRecords = (panitiaRes.data) || [];
+  jabatanList = toArr(masterData.jabatan);
+
   renderMenuSettings();
   renderKategoriList();
+  renderPanitiaRecords();
   renderPanitiaList();
+  renderLpjInfo();
 }
 
 // ===== SECTION SWITCHING =====
 function showSection(name) {
-  ['menu', 'kategori', 'panitia', 'pin'].forEach(s => {
+  ['menu', 'kategori', 'panitia', 'lpj', 'pin'].forEach(s => {
     document.getElementById('section-' + s).classList.add('hidden');
     document.getElementById('tab-btn-' + s).className =
       "flex-1 py-2.5 px-2 text-[11px] font-bold text-gray-500 hover:bg-gray-50 rounded-xl transition-all";
@@ -162,7 +172,52 @@ async function removeKategori(index) {
   }
 }
 
-// ===== PANITIA MASTER =====
+// ===== PANITIA RECORDS (actual susunan) =====
+function renderPanitiaRecords() {
+  const el = document.getElementById('panitia-records-list');
+  if (!panitiaRecords || panitiaRecords.length === 0) {
+    el.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">Belum ada susunan panitia</p>';
+    return;
+  }
+  el.innerHTML = panitiaRecords.map(item => `
+    <div class="flex items-center gap-2 p-2.5 bg-gray-50 rounded-xl border border-gray-100">
+      <span class="flex-1 text-sm font-medium text-gray-700 truncate">${item.nama}</span>
+      <select class="jabatan-select bg-white rounded-xl border border-gray-200 text-xs font-medium text-gray-700 appearance-none outline-none input-focus"
+        onchange="updateJabatan('${item.key}', this.value)">
+        ${jabatanList.map(j => `<option value="${j}" ${j === item.jabatan ? 'selected' : ''}>${j}</option>`).join('')}
+        ${!jabatanList.includes(item.jabatan) ? `<option value="${item.jabatan}" selected>${item.jabatan}</option>` : ''}
+      </select>
+      <button onclick="deletePanitiaRecord('${item.key}')" class="btn-delete bg-red-50 hover:bg-red-100 rounded-lg transition-all flex-shrink-0">
+        <i data-lucide="trash-2" class="w-4 h-4 text-red-500"></i>
+      </button>
+    </div>
+  `).join('');
+  lucide.createIcons();
+}
+
+async function updateJabatan(key, jabatan) {
+  const res = await Api.updatePanitiaJabatan(key, jabatan);
+  if (res.status === 'success') {
+    const record = panitiaRecords.find(r => r.key === key);
+    if (record) record.jabatan = jabatan;
+    showToast('Jabatan diperbarui');
+  } else {
+    showToast('Gagal: ' + res.message, true);
+  }
+}
+
+async function deletePanitiaRecord(key) {
+  const res = await Api.deletePanitia(key);
+  if (res.status === 'success') {
+    panitiaRecords = panitiaRecords.filter(r => r.key !== key);
+    renderPanitiaRecords();
+    showToast('Panitia dihapus');
+  } else {
+    showToast('Gagal: ' + res.message, true);
+  }
+}
+
+// ===== PANITIA MASTER (nama dropdown) =====
 function renderPanitiaList() {
   const list = toArr(masterData.namaPanitia);
   const el = document.getElementById('panitia-master-list');
@@ -210,6 +265,28 @@ async function removePanitia(index) {
     masterData.namaPanitia = list;
     renderPanitiaList();
     showToast('Nama dihapus');
+  } else {
+    showToast('Gagal: ' + res.message, true);
+  }
+}
+
+// ===== LPJ INFO =====
+function renderLpjInfo() {
+  const info = adminConfig.lpjInfo || {};
+  document.getElementById('lpj-lembaga').value = info.lembaga || '';
+  document.getElementById('lpj-alamat').value = info.alamat || '';
+  document.getElementById('lpj-kegiatan').value = info.kegiatan || '';
+}
+
+async function saveLpjInfo() {
+  const lembaga = clean(document.getElementById('lpj-lembaga').value, 100) || 'TPQ AL-MAIDAH KARANGSONO';
+  const alamat = clean(document.getElementById('lpj-alamat').value, 200);
+  const kegiatan = clean(document.getElementById('lpj-kegiatan').value, 100) || 'WISUDA SANTRI';
+  const newConfig = Object.assign({}, adminConfig, { lpjInfo: { lembaga, alamat, kegiatan } });
+  const res = await Api.saveAdminConfig(newConfig);
+  if (res.status === 'success') {
+    adminConfig = newConfig;
+    showToast('Info LPJ disimpan');
   } else {
     showToast('Gagal: ' + res.message, true);
   }
