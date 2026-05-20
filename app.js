@@ -111,15 +111,20 @@ async function applyHeaderInfo() {
   const res = await Api.getAdminConfig();
   const cfg = res.data || {};
   const info = cfg.lpjInfo || {};
-  if (info.lembaga) {
-    const el = document.getElementById('header-lembaga');
-    if (el) el.textContent = info.lembaga;
-    document.title = info.lembaga;
-  }
-  if (info.kegiatan) {
-    const el = document.getElementById('header-kegiatan');
-    if (el) el.textContent = info.kegiatan;
-  }
+  const lembaga = info.lembaga || 'TPQ AL-MAIDAH KARANGSONO';
+  const kegiatan = info.kegiatan || 'Sistem Administrasi';
+  const year = new Date().getFullYear();
+
+  const elH = document.getElementById('header-lembaga');
+  if (elH) elH.textContent = lembaga;
+
+  const elK = document.getElementById('header-kegiatan');
+  if (elK) elK.textContent = kegiatan;
+
+  const elF = document.getElementById('footer-lembaga');
+  if (elF) elF.textContent = '©' + year + ' ' + lembaga;
+
+  document.title = lembaga;
 }
 
 init();
