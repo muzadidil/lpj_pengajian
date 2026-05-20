@@ -21,8 +21,8 @@
     "pengeluaran": {
       ".read": "auth != null",
       "$id": {
-        ".write": "auth != null && !data.exists()",
-        ".validate": "newData.hasChildren(['pj', 'keterangan', 'total', 'kategori'])",
+        ".write": "auth != null",
+        ".validate": "!newData.exists() || newData.hasChildren(['pj', 'keterangan', 'total', 'kategori'])",
         "pj":         { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 100" },
         "jabatanPj":  { ".validate": "newData.isString() && newData.val().length <= 50" },
         "keterangan": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 200" },
@@ -39,8 +39,8 @@
     "pemasukan": {
       ".read": "auth != null",
       "$id": {
-        ".write": "auth != null && !data.exists()",
-        ".validate": "newData.hasChildren(['pj', 'nominal'])",
+        ".write": "auth != null",
+        ".validate": "!newData.exists() || newData.hasChildren(['pj', 'nominal'])",
         "pj":         { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 100" },
         "nominal":    { ".validate": "newData.isNumber() && newData.val() >= 0" },
         "keterangan": { ".validate": "newData.isString() && newData.val().length <= 200" },

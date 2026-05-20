@@ -71,6 +71,7 @@
         <button id="tab-btn-satuan"   onclick="showSection('satuan')"   class="flex-shrink-0 py-2.5 px-3 text-[10px] font-bold text-gray-500 hover:bg-gray-50 rounded-xl transition-all">Satuan</button>
         <button id="tab-btn-jabatan"  onclick="showSection('jabatan')"  class="flex-shrink-0 py-2.5 px-3 text-[10px] font-bold text-gray-500 hover:bg-gray-50 rounded-xl transition-all">Jabatan</button>
         <button id="tab-btn-panitia"  onclick="showSection('panitia')"  class="flex-shrink-0 py-2.5 px-3 text-[10px] font-bold text-gray-500 hover:bg-gray-50 rounded-xl transition-all">Panitia</button>
+        <button id="tab-btn-audit"    onclick="showSection('audit')"    class="flex-shrink-0 py-2.5 px-3 text-[10px] font-bold text-gray-500 hover:bg-gray-50 rounded-xl transition-all">Audit</button>
         <button id="tab-btn-lpj"      onclick="showSection('lpj')"      class="flex-shrink-0 py-2.5 px-3 text-[10px] font-bold text-gray-500 hover:bg-gray-50 rounded-xl transition-all">LPJ</button>
         <button id="tab-btn-akun"     onclick="showSection('akun')"     class="flex-shrink-0 py-2.5 px-3 text-[10px] font-bold text-gray-500 hover:bg-gray-50 rounded-xl transition-all">Akun</button>
       </div>
@@ -206,6 +207,82 @@
           </div>
           <div id="panitia-master-list" class="space-y-2 max-h-[200px] overflow-y-auto pr-1"></div>
         </div>
+
+        <!-- PIN per Anggota -->
+        <div class="border-t border-gray-100 pt-5">
+          <div class="flex items-center justify-between mb-3">
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">PIN per Anggota</p>
+            <button onclick="renderMemberPinList()" class="btn-delete bg-gray-100 hover:bg-gray-200 rounded-lg" title="Refresh">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-gray-500"></i>
+            </button>
+          </div>
+          <p class="text-[10px] text-gray-400 mb-3">Setiap anggota bisa punya PIN sendiri. Jika belum diset, pakai PIN bersama.</p>
+          <div id="member-pin-list" class="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+            <p class="text-xs text-gray-400 text-center py-2">Memuat...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Audit Pengeluaran -->
+      <div id="section-audit" class="hidden glass-card rounded-3xl p-6 max-w-md mx-auto">
+        <div class="flex items-center gap-3 mb-5 border-b border-gray-100 pb-4">
+          <div class="p-2 bg-amber-50 rounded-lg"><i data-lucide="search" class="w-5 h-5 text-amber-600"></i></div>
+          <div class="flex-1">
+            <h2 class="text-gray-800 font-bold text-sm">AUDIT PENGELUARAN</h2>
+            <p class="text-[10px] text-gray-400">Koreksi atau hapus data yang salah input</p>
+          </div>
+          <button onclick="loadAuditList()" class="btn-delete bg-gray-100 hover:bg-gray-200 rounded-xl" title="Refresh">
+            <i data-lucide="refresh-cw" class="w-4 h-4 text-gray-500"></i>
+          </button>
+        </div>
+
+        <!-- Edit Form (hidden by default) -->
+        <div id="audit-edit-form" class="hidden mb-4 p-4 bg-amber-50 rounded-2xl border border-amber-200 space-y-3">
+          <p class="text-xs font-bold text-amber-700">Edit Data Pengeluaran</p>
+          <input type="hidden" id="audit-edit-key">
+          <input type="hidden" id="audit-edit-waktu">
+          <div class="grid grid-cols-2 gap-2">
+            <div class="space-y-1">
+              <label class="text-[10px] font-bold text-gray-500">Nama PJ</label>
+              <input type="text" id="audit-pj" class="w-full bg-white px-3 py-2 rounded-xl border border-gray-200 text-sm outline-none input-focus">
+            </div>
+            <div class="space-y-1">
+              <label class="text-[10px] font-bold text-gray-500">Jabatan PJ</label>
+              <input type="text" id="audit-jabatanPj" class="w-full bg-white px-3 py-2 rounded-xl border border-gray-200 text-sm outline-none input-focus">
+            </div>
+          </div>
+          <div class="space-y-1">
+            <label class="text-[10px] font-bold text-gray-500">Keterangan</label>
+            <input type="text" id="audit-keterangan" class="w-full bg-white px-3 py-2 rounded-xl border border-gray-200 text-sm outline-none input-focus">
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+            <div class="space-y-1">
+              <label class="text-[10px] font-bold text-gray-500">Total (Rp)</label>
+              <input type="number" id="audit-total" class="w-full bg-white px-3 py-2 rounded-xl border border-gray-200 text-sm outline-none input-focus">
+            </div>
+            <div class="space-y-1">
+              <label class="text-[10px] font-bold text-gray-500">Qty</label>
+              <input type="number" id="audit-qty" class="w-full bg-white px-3 py-2 rounded-xl border border-gray-200 text-sm outline-none input-focus">
+            </div>
+            <div class="space-y-1">
+              <label class="text-[10px] font-bold text-gray-500">Satuan</label>
+              <input type="text" id="audit-satuan" class="w-full bg-white px-3 py-2 rounded-xl border border-gray-200 text-sm outline-none input-focus">
+            </div>
+          </div>
+          <div class="space-y-1">
+            <label class="text-[10px] font-bold text-gray-500">Kategori</label>
+            <input type="text" id="audit-kategori" class="w-full bg-white px-3 py-2 rounded-xl border border-gray-200 text-sm outline-none input-focus">
+          </div>
+          <div class="flex gap-2">
+            <button onclick="saveAuditEdit()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl text-sm btn-bounce">Simpan</button>
+            <button onclick="cancelAuditEdit()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 rounded-xl text-sm">Batal</button>
+          </div>
+        </div>
+
+        <!-- Audit Record List -->
+        <div id="audit-list" class="space-y-2 max-h-[500px] overflow-y-auto pr-1">
+          <p class="text-xs text-gray-400 text-center py-4">Membuka tab Audit untuk memuat data...</p>
+        </div>
       </div>
 
       <!-- Section: LPJ Info -->
@@ -335,7 +412,7 @@
         <div class="border-t border-gray-100 pt-6">
           <div class="flex items-center gap-3 mb-4">
             <div class="p-2 bg-green-50 rounded-lg"><i data-lucide="users" class="w-5 h-5 text-green-600"></i></div>
-            <div><h2 class="text-gray-800 font-bold text-sm">PIN ANGGOTA</h2><p class="text-[10px] text-gray-400">PIN login untuk semua anggota</p></div>
+            <div><h2 class="text-gray-800 font-bold text-sm">PIN BERSAMA ANGGOTA</h2><p class="text-[10px] text-gray-400">Dipakai jika anggota belum punya PIN sendiri</p></div>
           </div>
           <div class="space-y-3">
             <input type="password" id="new-member-pin" placeholder="PIN anggota baru" inputmode="numeric" maxlength="8"

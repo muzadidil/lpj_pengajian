@@ -30,12 +30,22 @@ async function memberLogin() {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pin));
   const inputHash = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
 
-  const res = await Api.getAdminConfig();
-  const cfg = res.data || {};
-  const storedHash = cfg.memberPinHash || (await (async () => {
-    const buf2 = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('1234'));
-    return Array.from(new Uint8Array(buf2)).map(b => b.toString(16).padStart(2, '0')).join('');
-  })());
+  // Cek PIN per anggota dulu, fallback ke PIN bersama
+  const nameKey = nama.replace(/[.#$/\[\]]/g, '_');
+  const [cfgRes, pinsRes] = await Promise.all([Api.getAdminConfig(), Api.getMemberPins()]);
+  const cfg = cfgRes.data || {};
+  const memberPins = pinsRes.data || {};
+
+  let storedHash;
+  if (memberPins[nameKey]) {
+    storedHash = memberPins[nameKey];
+  } else {
+    storedHash = cfg.memberPinHash;
+    if (!storedHash) {
+      const buf2 = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('1234'));
+      storedHash = Array.from(new Uint8Array(buf2)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+  }
 
   if (inputHash !== storedHash) {
     errEl.textContent = 'PIN salah. PIN default: 1234';

@@ -83,6 +83,7 @@ async function loadAdminPanel() {
   renderJabatanList();
   renderPanitiaRecords();
   renderPanitiaList();
+  renderMemberPinList();
   renderLpjInfo();
   renderStruktur();
   renderLogoPreview();
@@ -90,12 +91,13 @@ async function loadAdminPanel() {
 
 // ===== SECTION SWITCHING =====
 function showSection(name) {
-  ['menu','kategori','satuan','jabatan','panitia','lpj','akun'].forEach(s => {
+  ['menu','kategori','satuan','jabatan','panitia','audit','lpj','akun'].forEach(s => {
     document.getElementById('section-' + s).classList.add('hidden');
     document.getElementById('tab-btn-' + s).className = "flex-shrink-0 py-2.5 px-3 text-[10px] font-bold text-gray-500 hover:bg-gray-50 rounded-xl transition-all";
   });
   document.getElementById('section-' + name).classList.remove('hidden');
   document.getElementById('tab-btn-' + name).className = "active-tab flex-shrink-0 py-2.5 px-3 text-[10px] font-bold rounded-xl transition-all";
+  if (name === 'audit' && !auditLoaded) loadAuditList();
   lucide.createIcons();
 }
 
@@ -487,6 +489,168 @@ async function importExcelFile(file) {
     } catch (err) { showToast('Error baca file: ' + err.message, true); }
   };
   reader.readAsArrayBuffer(file);
+}
+
+// ===== AUDIT PENGELUARAN =====
+let auditRecords = [];
+let auditLoaded = false;
+
+async function loadAuditList() {
+  auditLoaded = true;
+  document.getElementById('audit-list').innerHTML = '<p class="text-xs text-gray-400 text-center py-4">Memuat data...</p>';
+  const res = await Api.getAllPengeluaranRecords();
+  auditRecords = res.data || [];
+  renderAuditList();
+}
+
+function renderAuditList() {
+  const el = document.getElementById('audit-list');
+  if (!auditRecords.length) {
+    el.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">Belum ada data pengeluaran</p>';
+    return;
+  }
+  const fmt = (n) => new Intl.NumberFormat('id-ID').format(n);
+  el.innerHTML = auditRecords.map((r, i) => `
+    <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
+      <div class="flex items-start gap-2 mb-1">
+        <div class="flex-1 min-w-0">
+          <p class="text-xs font-bold text-gray-700 truncate">${r.keterangan}</p>
+          <p class="text-[10px] text-gray-400 truncate">${r.waktuFmt} · ${r.pj}${r.jabatanPj ? ' (' + r.jabatanPj + ')' : ''}</p>
+          <p class="text-[10px] text-gray-400">${r.kategori} · ${r.qty > 0 ? r.qty + ' ' + r.satuan : ''}</p>
+        </div>
+        <span class="text-xs font-bold text-red-600 flex-shrink-0">Rp ${fmt(r.total)}</span>
+      </div>
+      <div class="flex gap-1.5 mt-2">
+        <button onclick="openAuditEdit(${i})" class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold py-1.5 rounded-lg text-[10px] btn-bounce flex items-center justify-center gap-1">
+          <i data-lucide="pencil" class="w-3 h-3"></i> Edit
+        </button>
+        <button onclick="confirmDeletePengeluaran('${r.key}')" class="flex-1 bg-red-50 hover:bg-red-100 text-red-500 font-bold py-1.5 rounded-lg text-[10px] btn-bounce flex items-center justify-center gap-1">
+          <i data-lucide="trash-2" class="w-3 h-3"></i> Hapus
+        </button>
+      </div>
+    </div>`).join('');
+  lucide.createIcons();
+}
+
+function openAuditEdit(index) {
+  const r = auditRecords[index];
+  document.getElementById('audit-edit-key').value = r.key;
+  document.getElementById('audit-edit-waktu').value = r.waktu;
+  document.getElementById('audit-pj').value = r.pj !== '-' ? r.pj : '';
+  document.getElementById('audit-jabatanPj').value = r.jabatanPj || '';
+  document.getElementById('audit-keterangan').value = r.keterangan !== '-' ? r.keterangan : '';
+  document.getElementById('audit-total').value = r.total;
+  document.getElementById('audit-qty').value = r.qty || 0;
+  document.getElementById('audit-satuan').value = r.satuan !== '-' ? r.satuan : '';
+  document.getElementById('audit-kategori').value = r.kategori !== '-' ? r.kategori : '';
+  const form = document.getElementById('audit-edit-form');
+  form.classList.remove('hidden');
+  form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function cancelAuditEdit() {
+  document.getElementById('audit-edit-form').classList.add('hidden');
+}
+
+async function saveAuditEdit() {
+  const key = document.getElementById('audit-edit-key').value;
+  const waktu = Number(document.getElementById('audit-edit-waktu').value);
+  const pj = document.getElementById('audit-pj').value.trim();
+  const keterangan = document.getElementById('audit-keterangan').value.trim();
+  const total = Number(document.getElementById('audit-total').value);
+  if (!pj || !keterangan || total <= 0) { showToast('PJ, keterangan, dan total wajib diisi', true); return; }
+  const data = {
+    waktu: waktu || Date.now(),
+    pj, keterangan, total,
+    jabatanPj: document.getElementById('audit-jabatanPj').value.trim(),
+    qty: Number(document.getElementById('audit-qty').value) || 0,
+    satuan: document.getElementById('audit-satuan').value.trim() || '-',
+    kategori: document.getElementById('audit-kategori').value.trim() || 'Lainnya'
+  };
+  const res = await Api.updatePengeluaran(key, data);
+  if (res.status === 'success') {
+    cancelAuditEdit();
+    await loadAuditList();
+    showToast('Data berhasil diperbarui');
+  } else { showToast('Gagal: ' + res.message, true); }
+}
+
+async function confirmDeletePengeluaran(key) {
+  if (!confirm('Yakin hapus data ini? Tidak bisa dibatalkan.')) return;
+  const res = await Api.deletePengeluaran(key);
+  if (res.status === 'success') {
+    auditRecords = auditRecords.filter(r => r.key !== key);
+    renderAuditList();
+    showToast('Data dihapus');
+  } else { showToast('Gagal: ' + res.message, true); }
+}
+
+// ===== PIN PER ANGGOTA =====
+let memberPinsData = {};
+
+async function renderMemberPinList() {
+  const el = document.getElementById('member-pin-list');
+  const namaList = toArr(masterData.namaPanitia);
+  if (!namaList.length) {
+    el.innerHTML = '<p class="text-xs text-gray-400 text-center py-2">Belum ada nama anggota di Master Nama</p>';
+    return;
+  }
+  el.innerHTML = '<p class="text-xs text-gray-400 text-center py-2">Memuat...</p>';
+  const res = await Api.getMemberPins();
+  memberPinsData = res.data || {};
+  el.innerHTML = namaList.map((nama, i) => {
+    const nameKey = nama.replace(/[.#$/\[\]]/g, '_');
+    const hasPin = !!memberPinsData[nameKey];
+    return `
+    <div class="p-2.5 bg-gray-50 rounded-xl border border-gray-100">
+      <div class="flex items-center gap-2">
+        <span class="flex-1 text-sm font-medium text-gray-700 truncate">${nama}</span>
+        <span class="text-[10px] px-2 py-0.5 rounded-full font-bold flex-shrink-0 ${hasPin ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400'}">${hasPin ? 'PIN sendiri' : 'PIN bersama'}</span>
+        <button onclick="togglePinSetForm(${i})" class="btn-delete bg-blue-50 hover:bg-blue-100 rounded-lg flex-shrink-0">
+          <i data-lucide="key" class="w-3.5 h-3.5 text-blue-500"></i>
+        </button>
+      </div>
+      <div id="pin-set-form-${i}" class="hidden mt-2 space-y-2">
+        <input type="password" id="pin-set-input-${i}" placeholder="PIN baru (min 4 digit)" inputmode="numeric" maxlength="8"
+          class="w-full bg-white px-3 py-2 rounded-xl border border-gray-200 text-sm text-center tracking-widest outline-none input-focus">
+        <div class="flex gap-2">
+          <button onclick="saveMemberPinAdmin(${i}, '${nama}')" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-1.5 rounded-lg text-xs btn-bounce">Simpan PIN</button>
+          ${hasPin ? `<button onclick="resetMemberPin(${i}, '${nama}')" class="bg-orange-100 hover:bg-orange-200 text-orange-600 font-bold py-1.5 px-3 rounded-lg text-xs btn-bounce">Reset</button>` : ''}
+          <button onclick="togglePinSetForm(${i})" class="bg-gray-200 hover:bg-gray-300 text-gray-600 font-bold py-1.5 px-3 rounded-lg text-xs">Batal</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  lucide.createIcons();
+}
+
+function togglePinSetForm(i) {
+  const form = document.getElementById('pin-set-form-' + i);
+  form.classList.toggle('hidden');
+  if (!form.classList.contains('hidden')) document.getElementById('pin-set-input-' + i).focus();
+}
+
+async function saveMemberPinAdmin(i, nama) {
+  const pinInput = document.getElementById('pin-set-input-' + i);
+  const pin = pinInput.value.trim();
+  if (!pin || pin.length < 4) { showToast('PIN minimal 4 digit', true); return; }
+  const nameKey = nama.replace(/[.#$/\[\]]/g, '_');
+  const pinHash = await hashPin(pin);
+  const res = await Api.setMemberPin(nameKey, pinHash);
+  if (res.status === 'success') {
+    pinInput.value = '';
+    showToast('PIN ' + nama + ' berhasil diset');
+    renderMemberPinList();
+  } else { showToast('Gagal: ' + res.message, true); }
+}
+
+async function resetMemberPin(i, nama) {
+  const nameKey = nama.replace(/[.#$/\[\]]/g, '_');
+  const res = await Api.removeMemberPin(nameKey);
+  if (res.status === 'success') {
+    showToast('PIN ' + nama + ' direset ke PIN bersama');
+    renderMemberPinList();
+  } else { showToast('Gagal: ' + res.message, true); }
 }
 
 // ===== TOAST =====

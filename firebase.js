@@ -398,5 +398,99 @@ const Api = {
     } catch (e) {
       return { status: 'error', message: logError('deletePanitia', e).message };
     }
+  },
+
+  // 16. Admin audit: get all pengeluaran records with keys (newest first)
+  async getAllPengeluaranRecords() {
+    try {
+      await authReady;
+      const snap = await db.ref('pengeluaran').once('value');
+      const val = snap.val() || {};
+      const list = Object.keys(val).map(k => {
+        const r = val[k];
+        return {
+          key: k,
+          waktu: r.waktu || 0,
+          waktuFmt: formatTanggalJam(r.waktu),
+          pj: r.pj || '-',
+          jabatanPj: r.jabatanPj || '',
+          keterangan: r.keterangan || '-',
+          total: Number(r.total) || 0,
+          qty: r.qty || 0,
+          satuan: r.satuan || '-',
+          kategori: r.kategori || '-',
+          status: r.status || ''
+        };
+      });
+      list.sort((a, b) => b.waktu - a.waktu);
+      return { status: 'success', data: list };
+    } catch (e) {
+      return { status: 'error', data: [], message: logError('getAllPengeluaranRecords', e).message };
+    }
+  },
+
+  // 17. Admin audit: update a pengeluaran record
+  async updatePengeluaran(key, data) {
+    try {
+      await authReady;
+      await db.ref('pengeluaran/' + key).set({
+        waktu: data.waktu || Date.now(),
+        pj: clean(data.pj, 100),
+        jabatanPj: clean(data.jabatanPj || '', 50),
+        keterangan: clean(data.keterangan, 200),
+        total: Number(data.total) || 0,
+        qty: Number(data.qty) || 0,
+        satuan: clean(data.satuan || '-', 50),
+        kategori: clean(data.kategori || 'Lainnya', 50),
+        status: 'Edit'
+      });
+      return { status: 'success' };
+    } catch (e) {
+      return { status: 'error', message: logError('updatePengeluaran', e).message };
+    }
+  },
+
+  // 18. Admin audit: delete a pengeluaran record
+  async deletePengeluaran(key) {
+    try {
+      await authReady;
+      await db.ref('pengeluaran/' + key).remove();
+      return { status: 'success' };
+    } catch (e) {
+      return { status: 'error', message: logError('deletePengeluaran', e).message };
+    }
+  },
+
+  // 19. Get all per-member PIN hashes from /admin/memberPins
+  async getMemberPins() {
+    try {
+      await authReady;
+      const snap = await db.ref('admin/memberPins').once('value');
+      return { status: 'success', data: snap.val() || {} };
+    } catch (e) {
+      return { status: 'error', data: {}, message: logError('getMemberPins', e).message };
+    }
+  },
+
+  // 20. Set individual member PIN hash
+  async setMemberPin(nameKey, pinHash) {
+    try {
+      await authReady;
+      await db.ref('admin/memberPins/' + nameKey).set(pinHash);
+      return { status: 'success' };
+    } catch (e) {
+      return { status: 'error', message: logError('setMemberPin', e).message };
+    }
+  },
+
+  // 21. Remove individual member PIN (reverts to shared PIN)
+  async removeMemberPin(nameKey) {
+    try {
+      await authReady;
+      await db.ref('admin/memberPins/' + nameKey).remove();
+      return { status: 'success' };
+    } catch (e) {
+      return { status: 'error', message: logError('removeMemberPin', e).message };
+    }
   }
 };
