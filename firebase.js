@@ -57,8 +57,9 @@ function toArr(value) {
 }
 
 function _dateParts(ms) {
-  const fmt = new Intl.DateTimeFormat('en-GB', {
+  const fmt = new Intl.DateTimeFormat('id-ID', {
     timeZone: 'Asia/Jakarta',
+    weekday: 'long',
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit', hour12: false
   });
@@ -70,7 +71,8 @@ function _dateParts(ms) {
 function formatTanggalJam(ms) {
   if (!ms) return '-';
   const p = _dateParts(ms);
-  return `${p.day}/${p.month}/${p.year} ${p.hour}:${p.minute}`;
+  const hari = p.weekday ? p.weekday.charAt(0).toUpperCase() + p.weekday.slice(1) : '';
+  return `${p.hour}:${p.minute} ${hari} ${p.day}/${p.month}/${p.year}`;
 }
 
 function formatTanggal(ms) {
