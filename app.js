@@ -104,6 +104,22 @@ function init() {
   loadDropdowns();
   loadMemberNameDropdown();
   applyMemberSession();
+  applyHeaderInfo();
+}
+
+async function applyHeaderInfo() {
+  const res = await Api.getAdminConfig();
+  const cfg = res.data || {};
+  const info = cfg.lpjInfo || {};
+  if (info.lembaga) {
+    const el = document.getElementById('header-lembaga');
+    if (el) el.textContent = info.lembaga;
+    document.title = info.lembaga;
+  }
+  if (info.kegiatan) {
+    const el = document.getElementById('header-kegiatan');
+    if (el) el.textContent = info.kegiatan;
+  }
 }
 
 init();
