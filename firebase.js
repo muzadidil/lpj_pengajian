@@ -125,6 +125,7 @@ const Api = {
       await db.ref('pengeluaran').push({
         waktu: firebase.database.ServerValue.TIMESTAMP,
         pj: pj,
+        jabatanPj: clean(data.jabatanPj || '', 50),
         keterangan: keterangan,
         total: total,
         qty: qty,
@@ -218,6 +219,7 @@ const Api = {
         return {
           waktu: formatTanggalJam(r.waktu),
           pj: r.pj || '-',
+          jabatanPj: r.jabatanPj || '',
           keterangan: r.keterangan || '-',
           total: Number(r.total) || 0,
           qty: r.qty || 0,
@@ -282,7 +284,9 @@ const Api = {
           keterangan: r.keterangan || '-',
           qty: r.qty || 0,
           satuan: r.satuan || '-',
-          nominal: nominal
+          nominal: nominal,
+          pj: r.pj || '-',
+          jabatanPj: r.jabatanPj || '-'
         });
         totalPengeluaran += nominal;
       });

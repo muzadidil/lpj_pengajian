@@ -44,10 +44,10 @@
       </div>
     </div>
 
-    <main class="flex-grow px-4 -mt-12 relative z-20">
+    <main class="flex-grow -mt-12 relative z-20">
 
       <div id="tab-input" class="tab-content block fade-up">
-        <div class="glass-card rounded-3xl p-6 sm:p-8 max-w-md mx-auto">
+        <div class="glass-card rounded-3xl p-6 sm:p-8">
           <div class="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
             <div class="p-2 bg-red-50 rounded-lg"><i data-lucide="wallet" class="w-5 h-5 text-red-600"></i></div>
             <div>
@@ -58,7 +58,7 @@
           <form id="bcaForm" onsubmit="handleSubmit(event)" class="space-y-4">
             <div class="space-y-1">
               <label class="text-[10px] font-bold text-gray-500 ml-1 uppercase tracking-wider">Penanggung Jawab</label>
-              <input type="text" id="pjPengeluaran" placeholder="Nama Penanggung Jawab" class="w-full bg-gray-50 px-4 py-3.5 rounded-2xl border border-gray-100 input-focus outline-none transition-all text-gray-700 font-medium placeholder:text-gray-300 uppercase text-sm" required>
+              <input type="text" id="pjPengeluaran" placeholder="Login sebagai anggota dulu" class="w-full bg-gray-100 px-4 py-3.5 rounded-2xl border border-gray-100 outline-none text-gray-700 font-medium uppercase text-sm" readonly required>
             </div>
             <div class="space-y-1">
               <label class="text-[10px] font-bold text-gray-500 ml-1 uppercase tracking-wider">Keterangan Pengeluaran</label>
@@ -96,7 +96,7 @@
       </div>
 
       <div id="tab-pemasukan" class="tab-content hidden fade-up">
-        <div class="glass-card rounded-3xl p-6 sm:p-8 max-w-md mx-auto">
+        <div class="glass-card rounded-3xl p-6 sm:p-8">
           <div class="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
             <div class="p-2 bg-green-50 rounded-lg"><i data-lucide="arrow-down-circle" class="w-5 h-5 text-green-600"></i></div>
             <div>
@@ -107,7 +107,7 @@
           <form id="pemasukanForm" onsubmit="handlePemasukan(event)" class="space-y-4">
             <div class="space-y-1">
               <label class="text-[10px] font-bold text-gray-500 ml-1 uppercase tracking-wider">Penanggung Jawab</label>
-              <input type="text" id="pjPemasukan" placeholder="Nama Penyetor / Donatur" class="w-full bg-gray-50 px-4 py-3.5 rounded-2xl border border-gray-100 input-focus outline-none transition-all text-gray-700 font-medium placeholder:text-gray-300 uppercase text-sm" required>
+              <input type="text" id="pjPemasukan" placeholder="Login sebagai anggota dulu" class="w-full bg-gray-100 px-4 py-3.5 rounded-2xl border border-gray-100 outline-none text-gray-700 font-medium uppercase text-sm" readonly required>
             </div>
             <div class="space-y-1">
               <label class="text-[10px] font-bold text-gray-500 ml-1 uppercase tracking-wider">Nominal (Rp)</label>
@@ -128,7 +128,7 @@
       </div>
 
       <div id="tab-panitia" class="tab-content hidden fade-up">
-        <div class="glass-card rounded-3xl p-6 sm:p-8 max-w-md mx-auto">
+        <div class="glass-card rounded-3xl p-6 sm:p-8">
 
           <div class="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
             <div class="p-2 bg-purple-50 rounded-lg"><i data-lucide="users" class="w-5 h-5 text-purple-600"></i></div>
@@ -185,7 +185,7 @@
       </div>
 
       <div id="tab-riwayat" class="tab-content hidden fade-up">
-        <div class="glass-card rounded-3xl p-6 sm:p-8 max-w-md mx-auto">
+        <div class="glass-card rounded-3xl p-6 sm:p-8">
           <div class="flex items-center justify-between mb-4 border-b border-gray-100 pb-4">
             <div class="flex items-center gap-3">
               <div class="p-2 bg-blue-50 rounded-lg"><i data-lucide="history" class="w-5 h-5 text-[#003399]"></i></div>
@@ -218,25 +218,10 @@
             <span class="loader-pro loader-blue mb-3"></span>
             <p class="text-xs text-gray-500 font-medium">Memuat data dari database...</p>
           </div>
-          <div id="riwayat-list" class="space-y-3 overflow-y-auto max-h-[400px] pr-2"></div>
-        </div>
-      </div>
-
-      <div id="tab-laporan" class="tab-content hidden fade-up">
-        <div class="glass-card rounded-3xl p-6 sm:p-8 max-w-md mx-auto">
-          <div class="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">
-            <div class="flex items-center gap-3">
-              <div class="p-2 bg-blue-50 rounded-lg"><i data-lucide="printer" class="w-5 h-5 text-[#003399]"></i></div>
-              <div>
-                <h2 class="text-gray-800 font-bold text-sm sm:text-base">LAPORAN & CETAK</h2>
-                <p class="text-[10px] text-gray-400">Generate LPJ Keuangan PDF</p>
-              </div>
-            </div>
-          </div>
-          <div class="text-center py-6">
-            <p class="text-xs text-gray-500 mb-6">Sistem akan menghitung Saldo Akhir dan menyusun rincian pengeluaran per kategori beserta tanda tangan kepanitiaan untuk dokumen LPJ.</p>
-            <button onclick="printLPJ()" id="btnPrint" class="w-full mt-2 mx-auto bca-gradient text-white font-bold py-4 px-8 rounded-2xl shadow-xl shadow-blue-200 flex items-center justify-center gap-3 transition-all btn-bounce hover:brightness-110">
-              <span id="btnTextPrint" class="flex items-center gap-2">CETAK PDF (LPJ) <i data-lucide="file-text" class="w-4 h-4"></i></span>
+          <div id="riwayat-list" class="space-y-3 overflow-y-auto max-h-[350px] pr-2 mb-4"></div>
+          <div class="border-t border-gray-100 pt-4">
+            <button onclick="printLPJ()" id="btnPrint" class="w-full bca-gradient text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-blue-200 flex items-center justify-center gap-2 transition-all btn-bounce hover:brightness-110">
+              <span id="btnTextPrint" class="flex items-center gap-2"><i data-lucide="printer" class="w-4 h-4"></i> CETAK PDF (LPJ)</span>
               <div id="loadingPrint" class="hidden flex items-center gap-2">
                 <span class="loader-pro" style="border-color: #fff; border-bottom-color: transparent;"></span><span class="text-sm">Menyiapkan...</span>
               </div>
@@ -265,12 +250,36 @@
 
   </div>
 
+  <!-- Member Login Modal -->
+  <div id="member-gate" class="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl p-8 w-full max-w-sm shadow-2xl modal-enter">
+      <div class="text-center mb-6">
+        <div class="w-14 h-14 bca-gradient rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-blue-200">
+          <i data-lucide="user-check" class="w-7 h-7 text-white"></i>
+        </div>
+        <h2 class="font-bold text-gray-800 text-base">Masuk sebagai Anggota</h2>
+        <p class="text-[10px] text-gray-400 mt-1">PIN default: <strong>1234</strong></p>
+      </div>
+      <div class="space-y-3">
+        <select id="memberNama" class="w-full bg-gray-50 px-4 py-3.5 rounded-2xl border border-gray-100 input-focus outline-none text-gray-700 font-medium appearance-none text-sm">
+          <option value="" disabled selected>Pilih Nama Anda...</option>
+        </select>
+        <input type="password" id="memberPin" placeholder="••••" inputmode="numeric" maxlength="8"
+          class="w-full bg-gray-50 px-4 py-3.5 rounded-2xl border border-gray-100 input-focus outline-none text-center text-2xl font-bold tracking-[0.5em] text-gray-700">
+        <p id="member-error" class="text-red-500 text-xs text-center hidden"></p>
+        <button onclick="memberLogin()" class="w-full bca-gradient text-white font-bold py-4 rounded-2xl shadow-xl shadow-blue-200 btn-bounce hover:brightness-110 transition-all">
+          Masuk
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Bottom Navigation -->
   <nav id="bottom-nav" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 shadow-2xl z-50">
     <div class="flex" style="max-width: 600px; margin: 0 auto;">
       <button id="btn-input" onclick="switchTab('input')" class="flex-1 flex flex-col items-center justify-center py-3 gap-0.5 text-[#003399] transition-all">
         <i data-lucide="trending-down" class="w-5 h-5"></i>
-        <span class="text-[10px] font-bold">Keluar</span>
+        <span class="text-[10px] font-bold">Dana</span>
       </button>
       <button id="btn-pemasukan" onclick="switchTab('pemasukan')" class="flex-1 flex flex-col items-center justify-center py-3 gap-0.5 text-gray-400 transition-all">
         <i data-lucide="trending-up" class="w-5 h-5"></i>
@@ -284,12 +293,15 @@
         <i data-lucide="history" class="w-5 h-5"></i>
         <span class="text-[10px] font-bold">Riwayat</span>
       </button>
-      <button id="btn-laporan" onclick="switchTab('laporan')" class="flex-1 flex flex-col items-center justify-center py-3 gap-0.5 text-gray-400 transition-all">
-        <i data-lucide="printer" class="w-5 h-5"></i>
-        <span class="text-[10px] font-bold">Cetak</span>
+      <button onclick="memberLogout()" class="flex-1 flex flex-col items-center justify-center py-3 gap-0.5 text-gray-400 transition-all">
+        <i data-lucide="log-out" class="w-5 h-5"></i>
+        <span class="text-[10px] font-bold">Logout</span>
       </button>
     </div>
   </nav>
+
+  <!-- QR Code library for PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <!-- Firebase SDK (compat) -->
   <script src="https://www.gstatic.com/firebasejs/12.13.0/firebase-app-compat.js"></script>

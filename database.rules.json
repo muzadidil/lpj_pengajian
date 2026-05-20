@@ -24,6 +24,7 @@
         ".write": "auth != null && !data.exists()",
         ".validate": "newData.hasChildren(['pj', 'keterangan', 'total', 'kategori'])",
         "pj":         { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 100" },
+        "jabatanPj":  { ".validate": "newData.isString() && newData.val().length <= 50" },
         "keterangan": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 200" },
         "total":      { ".validate": "newData.isNumber() && newData.val() >= 0" },
         "qty":        { ".validate": "newData.isNumber()" },
