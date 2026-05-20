@@ -305,7 +305,8 @@ const Api = {
           lpjInfo: {
             lembaga: lpjInfo.lembaga || 'TPQ AL-MAIDAH KARANGSONO',
             alamat: lpjInfo.alamat || '',
-            kegiatan: lpjInfo.kegiatan || 'WISUDA SANTRI'
+            kegiatan: lpjInfo.kegiatan || 'WISUDA SANTRI',
+            logoBase64: adminCfg.logoBase64 || ''
           }
         }
       };

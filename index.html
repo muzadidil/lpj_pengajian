@@ -219,12 +219,15 @@
             <p class="text-xs text-gray-500 font-medium">Memuat data dari database...</p>
           </div>
           <div id="riwayat-list" class="space-y-3 overflow-y-auto max-h-[350px] pr-2 mb-4"></div>
-          <div class="border-t border-gray-100 pt-4">
+          <div class="border-t border-gray-100 pt-4 space-y-2">
             <button onclick="printLPJ()" id="btnPrint" class="w-full bca-gradient text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-blue-200 flex items-center justify-center gap-2 transition-all btn-bounce hover:brightness-110">
               <span id="btnTextPrint" class="flex items-center gap-2"><i data-lucide="printer" class="w-4 h-4"></i> CETAK PDF (LPJ)</span>
               <div id="loadingPrint" class="hidden flex items-center gap-2">
                 <span class="loader-pro" style="border-color: #fff; border-bottom-color: transparent;"></span><span class="text-sm">Menyiapkan...</span>
               </div>
+            </button>
+            <button onclick="exportExcel()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-2 transition-all btn-bounce">
+              <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Export Excel
             </button>
           </div>
         </div>
@@ -302,6 +305,8 @@
 
   <!-- QR Code library for PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- SheetJS for Excel export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
   <!-- Firebase SDK (compat) -->
   <script src="https://www.gstatic.com/firebasejs/12.13.0/firebase-app-compat.js"></script>

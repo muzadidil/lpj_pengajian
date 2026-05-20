@@ -209,32 +209,106 @@
       </div>
 
       <!-- Section: LPJ Info -->
-      <div id="section-lpj" class="hidden glass-card rounded-3xl p-6 max-w-md mx-auto">
-        <div class="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
-          <div class="p-2 bg-blue-50 rounded-lg"><i data-lucide="file-text" class="w-5 h-5 text-[#003399]"></i></div>
-          <div><h2 class="text-gray-800 font-bold text-sm">INFO LAPORAN (LPJ)</h2><p class="text-[10px] text-gray-400">Header yang tampil di PDF cetakan</p></div>
+      <div id="section-lpj" class="hidden glass-card rounded-3xl p-6 max-w-md mx-auto space-y-6">
+
+        <!-- Info Dasar -->
+        <div>
+          <div class="flex items-center gap-3 mb-5 border-b border-gray-100 pb-4">
+            <div class="p-2 bg-blue-50 rounded-lg"><i data-lucide="file-text" class="w-5 h-5 text-[#003399]"></i></div>
+            <div><h2 class="text-gray-800 font-bold text-sm">INFO LAPORAN (LPJ)</h2><p class="text-[10px] text-gray-400">Header yang tampil di PDF cetakan</p></div>
+          </div>
+          <div class="space-y-3">
+            <div class="space-y-1">
+              <label class="text-[10px] font-bold text-gray-500 ml-1 uppercase tracking-wider">Nama Lembaga</label>
+              <input type="text" id="lpj-lembaga" placeholder="TPQ AL-MAIDAH KARANGSONO"
+                class="w-full bg-gray-50 px-4 py-3.5 rounded-2xl border border-gray-100 input-focus outline-none text-gray-700 font-medium text-sm">
+            </div>
+            <div class="space-y-1">
+              <label class="text-[10px] font-bold text-gray-500 ml-1 uppercase tracking-wider">Alamat</label>
+              <input type="text" id="lpj-alamat" placeholder="Karangsono, ..."
+                class="w-full bg-gray-50 px-4 py-3.5 rounded-2xl border border-gray-100 input-focus outline-none text-gray-700 font-medium text-sm">
+            </div>
+            <div class="space-y-1">
+              <label class="text-[10px] font-bold text-gray-500 ml-1 uppercase tracking-wider">Nama Kegiatan</label>
+              <input type="text" id="lpj-kegiatan" placeholder="WISUDA SANTRI"
+                class="w-full bg-gray-50 px-4 py-3.5 rounded-2xl border border-gray-100 input-focus outline-none text-gray-700 font-medium text-sm">
+            </div>
+            <button onclick="saveLpjInfo()" class="w-full bca-gradient text-white font-bold py-4 rounded-2xl shadow-xl shadow-blue-200 btn-bounce hover:brightness-110 transition-all">
+              Simpan Info LPJ
+            </button>
+          </div>
         </div>
-        <div class="space-y-4">
-          <div class="space-y-1">
-            <label class="text-[10px] font-bold text-gray-500 ml-1 uppercase tracking-wider">Nama Lembaga</label>
-            <input type="text" id="lpj-lembaga" placeholder="TPQ AL-MAIDAH KARANGSONO"
-              class="w-full bg-gray-50 px-4 py-3.5 rounded-2xl border border-gray-100 input-focus outline-none text-gray-700 font-medium text-sm">
+
+        <!-- Logo Upload -->
+        <div class="border-t border-gray-100 pt-5">
+          <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Logo Lembaga (opsional)</p>
+          <div class="flex gap-3 items-center mb-3">
+            <div id="logo-preview" class="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden border border-gray-200 flex-shrink-0">
+              <i data-lucide="image" class="w-6 h-6 text-gray-400"></i>
+            </div>
+            <div class="flex-1 space-y-1">
+              <input type="file" id="logo-input" accept="image/*" onchange="previewLogo(this)"
+                class="w-full text-xs text-gray-600 file:mr-2 file:py-1 file:px-3 file:rounded-xl file:border-0 file:bg-blue-50 file:text-blue-700 file:font-bold">
+              <p class="text-[10px] text-gray-400">Maks 200 KB. Tampil di header PDF.</p>
+            </div>
           </div>
-          <div class="space-y-1">
-            <label class="text-[10px] font-bold text-gray-500 ml-1 uppercase tracking-wider">Alamat</label>
-            <input type="text" id="lpj-alamat" placeholder="Karangsono, ..."
-              class="w-full bg-gray-50 px-4 py-3.5 rounded-2xl border border-gray-100 input-focus outline-none text-gray-700 font-medium text-sm">
+          <div class="flex gap-2">
+            <button onclick="saveLogo()" class="flex-1 bg-gray-700 hover:bg-gray-800 text-white font-bold py-3 rounded-2xl btn-bounce transition-all text-sm">
+              Simpan Logo
+            </button>
+            <button onclick="removeLogo()" class="bg-red-50 hover:bg-red-100 text-red-500 font-bold py-3 px-4 rounded-2xl btn-bounce transition-all text-sm border border-red-100">
+              Hapus
+            </button>
           </div>
-          <div class="space-y-1">
-            <label class="text-[10px] font-bold text-gray-500 ml-1 uppercase tracking-wider">Nama Kegiatan</label>
-            <input type="text" id="lpj-kegiatan" placeholder="WISUDA SANTRI"
-              class="w-full bg-gray-50 px-4 py-3.5 rounded-2xl border border-gray-100 input-focus outline-none text-gray-700 font-medium text-sm">
-          </div>
-          <button onclick="saveLpjInfo()" class="w-full bca-gradient text-white font-bold py-4 rounded-2xl shadow-xl shadow-blue-200 btn-bounce hover:brightness-110 transition-all">
-            Simpan Info LPJ
-          </button>
         </div>
+
+        <!-- Export / Import -->
+        <div class="border-t border-gray-100 pt-5">
+          <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Data Transaksi</p>
+          <div class="flex gap-2">
+            <button onclick="exportExcelAdmin()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-2xl btn-bounce transition-all text-xs flex items-center justify-center gap-1">
+              <i data-lucide="download" class="w-4 h-4"></i> Export Excel
+            </button>
+            <button onclick="importExcelPrompt()" class="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-2xl btn-bounce transition-all text-xs flex items-center justify-center gap-1">
+              <i data-lucide="upload" class="w-4 h-4"></i> Import Excel
+            </button>
+          </div>
+          <p class="text-[10px] text-gray-400 mt-2 text-center">Import: kolom Keterangan, Total, PJ, Kategori, Qty, Satuan, Jabatan PJ</p>
+        </div>
+
+        <!-- Penandatangan -->
+        <div class="border-t border-gray-100 pt-5">
+          <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Penandatangan LPJ</p>
+          <div class="space-y-3">
+            <div class="space-y-1">
+              <label class="text-[10px] font-bold text-gray-500 ml-1">Penanggung Jawab Kegiatan</label>
+              <input type="text" id="str-pj" placeholder="Nama lengkap..."
+                class="w-full bg-gray-50 px-4 py-3.5 rounded-2xl border border-gray-100 input-focus outline-none text-gray-700 font-medium text-sm uppercase">
+            </div>
+            <div class="space-y-1">
+              <label class="text-[10px] font-bold text-gray-500 ml-1">Ketua Panitia</label>
+              <input type="text" id="str-ketua" placeholder="Nama lengkap..."
+                class="w-full bg-gray-50 px-4 py-3.5 rounded-2xl border border-gray-100 input-focus outline-none text-gray-700 font-medium text-sm uppercase">
+            </div>
+            <div class="space-y-1">
+              <label class="text-[10px] font-bold text-gray-500 ml-1">Sekretaris</label>
+              <input type="text" id="str-sekretaris" placeholder="Nama lengkap..."
+                class="w-full bg-gray-50 px-4 py-3.5 rounded-2xl border border-gray-100 input-focus outline-none text-gray-700 font-medium text-sm uppercase">
+            </div>
+            <div class="space-y-1">
+              <label class="text-[10px] font-bold text-gray-500 ml-1">Bendahara</label>
+              <input type="text" id="str-bendahara" placeholder="Nama lengkap..."
+                class="w-full bg-gray-50 px-4 py-3.5 rounded-2xl border border-gray-100 input-focus outline-none text-gray-700 font-medium text-sm uppercase">
+            </div>
+            <button onclick="saveStruktur()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-green-200 btn-bounce transition-all">
+              Simpan Penandatangan
+            </button>
+          </div>
+        </div>
+
       </div>
+
+      <!-- Section: Export/Import (hidden, accessed via buttons above) -->
 
       <!-- Section: Akun (Admin PIN + Member PIN) -->
       <div id="section-akun" class="hidden glass-card rounded-3xl p-6 max-w-md mx-auto space-y-6">
@@ -287,6 +361,7 @@
 
   <div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 px-5 py-3 rounded-2xl text-white text-sm font-bold shadow-xl z-[200] transition-all whitespace-nowrap"></div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.13.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.13.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.13.0/firebase-database-compat.js"></script>

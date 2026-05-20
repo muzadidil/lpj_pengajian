@@ -8,8 +8,10 @@ let adminConfig = {};
 let masterData = {};
 let panitiaRecords = [];
 let jabatanList = [];
+let strukturData = {};
 
 const LICENSE_CODE = 'MUZADIDIL';
+const FIXED_JABATAN = ['Ketua', 'Sekretaris', 'Bendahara', 'Penasehat'];
 
 // ===== PIN HASHING =====
 async function hashPin(pin) {
@@ -65,10 +67,15 @@ async function verifyPin() {
 
 // ===== LOAD PANEL =====
 async function loadAdminPanel() {
-  const [masterRes, panitiaRes] = await Promise.all([Api.getMasterData(), Api.getAllPanitiaRecords()]);
+  const [masterRes, panitiaRes, strSnap] = await Promise.all([
+    Api.getMasterData(),
+    Api.getAllPanitiaRecords(),
+    db.ref('struktur').once('value')
+  ]);
   masterData = masterRes.data || {};
   panitiaRecords = panitiaRes.data || [];
   jabatanList = toArr(masterData.jabatan);
+  strukturData = strSnap.val() || {};
 
   renderMenuSettings();
   renderKategoriList();
@@ -77,6 +84,8 @@ async function loadAdminPanel() {
   renderPanitiaRecords();
   renderPanitiaList();
   renderLpjInfo();
+  renderStruktur();
+  renderLogoPreview();
 }
 
 // ===== SECTION SWITCHING =====
@@ -168,10 +177,44 @@ async function removeSatuan(index) {
   else { showToast('Gagal: ' + res.message, true); }
 }
 
-// ===== JABATAN =====
+// ===== JABATAN (with protected entries) =====
 function renderJabatanList() {
   jabatanList = toArr(masterData.jabatan);
-  renderMasterList('jabatan-list', jabatanList, 'removeJabatan');
+  const el = document.getElementById('jabatan-list');
+  if (!jabatanList.length) { el.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">Belum ada jabatan</p>'; return; }
+  el.innerHTML = jabatanList.map((item, i) => {
+    const isFixed = FIXED_JABATAN.includes(item);
+    return `
+    <div class="flex items-center gap-2 p-3 bg-gray-50 rounded-xl border border-gray-100">
+      ${isFixed ? '<i data-lucide="lock" class="w-3.5 h-3.5 text-gray-400 flex-shrink-0"></i>' : '<i data-lucide="briefcase" class="w-3.5 h-3.5 text-indigo-400 flex-shrink-0"></i>'}
+      <span id="jabatan-text-${i}" class="flex-1 text-sm font-medium text-gray-700">${item}</span>
+      <input id="jabatan-input-${i}" class="hidden flex-1 bg-white border border-indigo-200 rounded-lg px-2 py-1 text-sm text-gray-700 outline-none" value="${item}">
+      <button onclick="toggleRenameJabatan(${i})" class="btn-delete bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-all" title="Ganti nama">
+        <i data-lucide="pencil" class="w-4 h-4 text-indigo-500"></i>
+      </button>
+      <button id="jabatan-save-${i}" onclick="saveRenameJabatan(${i})" class="hidden btn-delete bg-green-50 hover:bg-green-100 rounded-lg transition-all">
+        <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
+      </button>
+      ${!isFixed ? `<button onclick="removeJabatan(${i})" class="btn-delete bg-red-50 hover:bg-red-100 rounded-lg transition-all"><i data-lucide="trash-2" class="w-4 h-4 text-red-500"></i></button>` : ''}
+    </div>`;
+  }).join('');
+  lucide.createIcons();
+}
+
+function toggleRenameJabatan(i) {
+  document.getElementById('jabatan-text-' + i).classList.toggle('hidden');
+  document.getElementById('jabatan-input-' + i).classList.toggle('hidden');
+  document.getElementById('jabatan-save-' + i).classList.toggle('hidden');
+}
+
+async function saveRenameJabatan(i) {
+  const newVal = clean(document.getElementById('jabatan-input-' + i).value, 50);
+  if (!newVal) return;
+  const list = toArr(masterData.jabatan);
+  list[i] = newVal;
+  const res = await Api.updateMasterList('jabatan', list);
+  if (res.status === 'success') { masterData.jabatan = list; jabatanList = list; renderJabatanList(); showToast('Jabatan diperbarui'); }
+  else { showToast('Gagal: ' + res.message, true); }
 }
 
 async function addJabatan() {
@@ -188,6 +231,7 @@ async function addJabatan() {
 
 async function removeJabatan(index) {
   const list = toArr(masterData.jabatan);
+  if (FIXED_JABATAN.includes(list[index])) { showToast('Jabatan ini tidak bisa dihapus', true); return; }
   list.splice(index, 1);
   const res = await Api.updateMasterList('jabatan', list);
   if (res.status === 'success') { masterData.jabatan = list; jabatanList = list; renderJabatanList(); showToast('Jabatan dihapus'); }
@@ -297,6 +341,152 @@ async function changeMemberPin() {
   const res = await Api.saveAdminConfig(newConfig);
   if (res.status === 'success') { adminConfig = newConfig; document.getElementById('new-member-pin').value = ''; document.getElementById('confirm-member-pin').value = ''; showToast('PIN anggota berhasil diubah'); }
   else { showToast('Gagal: ' + res.message, true); }
+}
+
+// ===== STRUKTUR (LPJ signatories) =====
+function renderStruktur() {
+  document.getElementById('str-pj').value = strukturData.pj || '';
+  document.getElementById('str-ketua').value = strukturData.ketua || '';
+  document.getElementById('str-sekretaris').value = strukturData.sekretaris || '';
+  document.getElementById('str-bendahara').value = strukturData.bendahara || '';
+}
+
+async function saveStruktur() {
+  const data = {
+    pj: clean(document.getElementById('str-pj').value, 100),
+    ketua: clean(document.getElementById('str-ketua').value, 100),
+    sekretaris: clean(document.getElementById('str-sekretaris').value, 100),
+    bendahara: clean(document.getElementById('str-bendahara').value, 100)
+  };
+  try {
+    await db.ref('struktur').set(data);
+    strukturData = data;
+    showToast('Penandatangan disimpan');
+  } catch (e) { showToast('Gagal: ' + e.message, true); }
+}
+
+// ===== LOGO =====
+let pendingLogoBase64 = null;
+
+function renderLogoPreview() {
+  const logo = adminConfig.logoBase64;
+  if (logo) {
+    document.getElementById('logo-preview').innerHTML = `<img src="${logo}" class="w-full h-full object-contain p-1">`;
+  }
+}
+
+function previewLogo(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 200 * 1024) { showToast('File terlalu besar, maks 200 KB', true); input.value = ''; return; }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    pendingLogoBase64 = e.target.result;
+    document.getElementById('logo-preview').innerHTML = `<img src="${pendingLogoBase64}" class="w-full h-full object-contain p-1">`;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function saveLogo() {
+  if (!pendingLogoBase64) { showToast('Pilih file logo terlebih dahulu', true); return; }
+  const newConfig = Object.assign({}, adminConfig, { logoBase64: pendingLogoBase64 });
+  const res = await Api.saveAdminConfig(newConfig);
+  if (res.status === 'success') { adminConfig = newConfig; pendingLogoBase64 = null; showToast('Logo disimpan'); }
+  else { showToast('Gagal: ' + res.message, true); }
+}
+
+async function removeLogo() {
+  const newConfig = Object.assign({}, adminConfig);
+  delete newConfig.logoBase64;
+  const res = await Api.saveAdminConfig(newConfig);
+  if (res.status === 'success') {
+    adminConfig = newConfig;
+    document.getElementById('logo-preview').innerHTML = '<i data-lucide="image" class="w-6 h-6 text-gray-400"></i>';
+    document.getElementById('logo-input').value = '';
+    pendingLogoBase64 = null;
+    lucide.createIcons();
+    showToast('Logo dihapus');
+  } else { showToast('Gagal: ' + res.message, true); }
+}
+
+// ===== EXPORT EXCEL (admin) =====
+async function exportExcelAdmin() {
+  showToast('Menyiapkan export...');
+  const [pengRes, pemRes] = await Promise.all([
+    db.ref('pengeluaran').once('value'),
+    db.ref('pemasukan').once('value')
+  ]);
+  const pengVal = pengRes.val() || {};
+  const pemVal = pemRes.val() || {};
+
+  const fmtDate = (ms) => ms ? new Date(ms).toLocaleDateString('id-ID') : '-';
+  const fmtTime = (ms) => ms ? new Date(ms).toLocaleString('id-ID') : '-';
+
+  const pengRows = Object.values(pengVal).map(r => ({
+    'Waktu': fmtTime(r.waktu), 'PJ': r.pj || '-', 'Jabatan PJ': r.jabatanPj || '-',
+    'Keterangan': r.keterangan || '-', 'Total': r.total || 0,
+    'Qty': r.qty || 0, 'Satuan': r.satuan || '-', 'Kategori': r.kategori || '-'
+  }));
+  pengRows.sort((a, b) => a.Waktu < b.Waktu ? 1 : -1);
+
+  const pemRows = Object.values(pemVal).map(r => ({
+    'Waktu': fmtTime(r.waktu), 'PJ': r.pj || '-', 'Nominal': r.nominal || 0, 'Keterangan': r.keterangan || '-'
+  }));
+  pemRows.sort((a, b) => a.Waktu < b.Waktu ? 1 : -1);
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(pengRows), 'Pengeluaran');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(pemRows), 'Pemasukan');
+  XLSX.writeFile(wb, `LPJ_${new Date().toISOString().slice(0,10)}.xlsx`);
+  showToast('File Excel berhasil diunduh');
+}
+
+// ===== IMPORT EXCEL (admin) =====
+function importExcelPrompt() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.xlsx,.xls,.csv';
+  input.onchange = (e) => importExcelFile(e.target.files[0]);
+  input.click();
+}
+
+async function importExcelFile(file) {
+  if (!file) return;
+  showToast('Membaca file...');
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'array' });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet);
+      if (!rows.length) { showToast('File kosong atau format salah', true); return; }
+
+      let sukses = 0, gagal = 0;
+      for (const row of rows) {
+        const keterangan = String(row['Keterangan'] || row['keterangan'] || '').trim();
+        const total = Number(row['Total'] || row['total'] || 0);
+        const pj = String(row['PJ'] || row['pj'] || '').trim();
+        const kategori = String(row['Kategori'] || row['kategori'] || 'Lainnya').trim();
+        if (!keterangan || !pj || total <= 0) { gagal++; continue; }
+        try {
+          await db.ref('pengeluaran').push({
+            waktu: firebase.database.ServerValue.TIMESTAMP,
+            pj: pj.slice(0, 100),
+            jabatanPj: String(row['Jabatan PJ'] || row['jabatanPj'] || '').slice(0, 50),
+            keterangan: keterangan.slice(0, 200),
+            total: total,
+            qty: Number(row['Qty'] || row['qty'] || 1),
+            satuan: String(row['Satuan'] || row['satuan'] || 'Pcs').slice(0, 50),
+            kategori: kategori.slice(0, 50),
+            status: 'Import'
+          });
+          sukses++;
+        } catch { gagal++; }
+      }
+      showToast(`Import selesai: ${sukses} berhasil, ${gagal} gagal`);
+    } catch (err) { showToast('Error baca file: ' + err.message, true); }
+  };
+  reader.readAsArrayBuffer(file);
 }
 
 // ===== TOAST =====

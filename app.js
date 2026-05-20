@@ -375,7 +375,7 @@ function generatePDFLayout(data, qrSrc) {
   <html><head><title>Cetak LPJ Keuangan</title>
   <style>
     body { font-family: 'Times New Roman', serif; font-size: 13px; padding: 20px; color: #000; position: relative; }
-    body::before { content: 'TPQ AL-MAIDAH'; position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%) rotate(-45deg); font-size: 72px; color: rgba(0,51,153,0.06); font-weight: bold; white-space: nowrap; z-index: 0; pointer-events: none; }
+    body::before { content: '${data.lpjInfo.lembaga}'; position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%) rotate(-45deg); font-size: 60px; color: rgba(0,51,153,0.06); font-weight: bold; white-space: nowrap; z-index: 0; pointer-events: none; }
     * { position: relative; z-index: 1; }
     h2 { text-align: center; margin-bottom: 20px; text-transform: uppercase; font-size: 17px; }
     h3 { text-transform: uppercase; font-size: 14px; margin-top: 30px; border-bottom: 2px solid #000; padding-bottom: 5px; }
@@ -392,11 +392,14 @@ function generatePDFLayout(data, qrSrc) {
     @media print { body::before { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
   </style></head>
   <body>
-    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
-      <div style="flex:1;">
-        <h2 style="text-align:left; font-size:16px; margin-bottom:4px;">LAPORAN PERTANGGUNGJAWABAN KEUANGAN (LPJ)<br>${data.lpjInfo.lembaga}</h2>
-        <p style="font-size:12px; margin:0;">Kegiatan: ${data.lpjInfo.kegiatan} &nbsp;|&nbsp; Tahun ${tahun}</p>
-        ${data.lpjInfo.alamat ? `<p style="font-size:11px; color:#555; margin:2px 0 0;">Alamat: ${data.lpjInfo.alamat}</p>` : ''}
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; border-bottom:2px solid #003399; padding-bottom:10px;">
+      <div style="display:flex; align-items:center; gap:12px; flex:1;">
+        ${data.lpjInfo.logoBase64 ? `<img src="${data.lpjInfo.logoBase64}" style="width:60px;height:60px;object-fit:contain;" alt="Logo">` : ''}
+        <div>
+          <h2 style="text-align:left; font-size:16px; margin:0 0 4px;">LAPORAN PERTANGGUNGJAWABAN KEUANGAN (LPJ)<br>${data.lpjInfo.lembaga}</h2>
+          <p style="font-size:12px; margin:0;">Kegiatan: ${data.lpjInfo.kegiatan} &nbsp;|&nbsp; Tahun ${tahun}</p>
+          ${data.lpjInfo.alamat ? `<p style="font-size:11px; color:#555; margin:2px 0 0;">Alamat: ${data.lpjInfo.alamat}</p>` : ''}
+        </div>
       </div>
       ${qrSrc ? `<div class="qr-block"><img src="${qrSrc}" alt="QR"><p>Scan untuk verifikasi</p></div>` : ''}
     </div>
@@ -448,6 +451,31 @@ function generatePDFLayout(data, qrSrc) {
   win.document.write(html);
   win.document.close();
   setTimeout(() => { win.print(); }, 800);
+}
+
+// ===== EXPORT EXCEL =====
+async function exportExcel() {
+  const res = await Api.getLPJData();
+  if (res.status !== 'success') { alert('Gagal mengambil data'); return; }
+  const d = res.data;
+
+  const pengRows = [];
+  for (const [kat, info] of Object.entries(d.grouped)) {
+    info.items.forEach(item => {
+      pengRows.push({
+        'Tanggal': item.tanggal, 'PJ': item.pj, 'Jabatan PJ': item.jabatanPj,
+        'Keterangan': item.keterangan, 'Qty': item.qty, 'Satuan': item.satuan,
+        'Total (Rp)': item.nominal, 'Kategori': kat
+      });
+    });
+  }
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(pengRows), 'Pengeluaran');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([
+    { 'Total Pemasukan': d.totalPemasukan, 'Total Pengeluaran': d.totalPengeluaran, 'Saldo': d.saldo }
+  ]), 'Ringkasan');
+  XLSX.writeFile(wb, `LPJ_${d.lpjInfo.kegiatan.replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 
 // ===== MODAL =====
