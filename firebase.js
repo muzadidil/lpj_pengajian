@@ -17,15 +17,14 @@
    so the UI code in app.js does not need to change its checks.
    ========================================== */
 
-// TODO: Replace with YOUR config (Firebase Console -> Project Settings -> Your apps -> Web app)
 const firebaseConfig = {
-  apiKey: "PASTE_API_KEY",
-  authDomain: "PASTE_PROJECT_ID.firebaseapp.com",
-  databaseURL: "https://PASTE_PROJECT_ID-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "PASTE_PROJECT_ID",
-  storageBucket: "PASTE_PROJECT_ID.appspot.com",
-  messagingSenderId: "PASTE_SENDER_ID",
-  appId: "PASTE_APP_ID"
+  apiKey: "AIzaSyDZapoLIviX-2tgi-DfaEYEASN4L8hbluY",
+  authDomain: "al-maidah-karangsono.firebaseapp.com",
+  databaseURL: "https://al-maidah-karangsono-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "al-maidah-karangsono",
+  storageBucket: "al-maidah-karangsono.firebasestorage.app",
+  messagingSenderId: "564960347514",
+  appId: "1:564960347514:web:275be4c13c03a6f058c2c3"
 };
 
 firebase.initializeApp(firebaseConfig);
