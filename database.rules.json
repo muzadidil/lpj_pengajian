@@ -3,9 +3,14 @@
     ".read": "auth != null",
     ".write": false,
 
+    "admin": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+
     "master": {
       ".read": "auth != null",
-      ".write": false
+      ".write": "auth != null"
     },
 
     "struktur": {

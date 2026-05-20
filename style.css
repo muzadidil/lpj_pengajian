@@ -109,3 +109,41 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* ===== Bottom Navigation ===== */
+#bottom-nav button {
+  width: auto !important;
+  padding: 10px 0 !important;
+  margin: 0 !important;
+  flex: 1;
+}
+
+/* ===== Admin Panel ===== */
+#admin-tabs button {
+  width: auto !important;
+  padding: 10px 8px !important;
+  margin: 0 !important;
+  flex: 1;
+}
+
+.btn-add {
+  width: auto !important;
+  padding: 10px 14px !important;
+  margin: 0 !important;
+}
+
+.btn-delete {
+  width: auto !important;
+  padding: 6px !important;
+  margin: 0 !important;
+}
+
+.active-tab {
+  background: #e6f0ff !important;
+  color: #003399 !important;
+}
+
+/* Safe area for iPhone X+ notch */
+#bottom-nav {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

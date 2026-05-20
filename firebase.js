@@ -300,5 +300,49 @@ const Api = {
     } catch (e) {
       return { status: 'error', message: logError('getLPJData', e).message };
     }
+  },
+
+  // 9. Admin: get config (pinHash + menu visibility)
+  async getAdminConfig() {
+    try {
+      await authReady;
+      const snap = await db.ref('admin/config').once('value');
+      return { status: 'success', data: snap.val() || {} };
+    } catch (e) {
+      return { status: 'error', data: {}, message: logError('getAdminConfig', e).message };
+    }
+  },
+
+  // 10. Admin: save full config
+  async saveAdminConfig(config) {
+    try {
+      await authReady;
+      await db.ref('admin/config').set(config);
+      return { status: 'success' };
+    } catch (e) {
+      return { status: 'error', message: logError('saveAdminConfig', e).message };
+    }
+  },
+
+  // 11. Admin: get full master data
+  async getMasterData() {
+    try {
+      await authReady;
+      const snap = await db.ref('master').once('value');
+      return { status: 'success', data: snap.val() || {} };
+    } catch (e) {
+      return { status: 'error', data: {}, message: logError('getMasterData', e).message };
+    }
+  },
+
+  // 12. Admin: overwrite a master list (kategori, namaPanitia, etc.)
+  async updateMasterList(key, arr) {
+    try {
+      await authReady;
+      await db.ref('master/' + key).set(arr);
+      return { status: 'success' };
+    } catch (e) {
+      return { status: 'error', message: logError('updateMasterList', e).message };
+    }
   }
 };

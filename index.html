@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="flex flex-col">
-  <div style="max-width: 600px; margin: 0 auto; padding: 15px; width: 100%;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 15px 15px 112px; width: 100%;">
 
     <header class="flex items-center justify-between mb-5 px-2 fade-up">
       <div class="flex items-center gap-3">
@@ -26,15 +26,10 @@
           <p class="text-[10px] text-gray-500 font-semibold uppercase tracking-wider">Sistem Administrasi</p>
         </div>
       </div>
+      <a href="admin.html" class="p-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all">
+        <i data-lucide="shield" class="w-5 h-5 text-gray-500"></i>
+      </a>
     </header>
-
-    <div class="flex bg-white rounded-2xl p-1.5 shadow-sm mb-6 border border-gray-100 header-tabs fade-up overflow-x-auto no-scrollbar gap-1">
-      <button id="btn-input" onclick="switchTab('input')" class="min-w-[90px] py-2.5 px-2 text-[11px] font-bold bg-[#e6f0ff] text-[#003399] rounded-xl transition-all shadow-sm">Keluar</button>
-      <button id="btn-pemasukan" onclick="switchTab('pemasukan')" class="min-w-[90px] py-2.5 px-2 text-[11px] font-bold text-gray-500 hover:bg-gray-50 hover:text-gray-700 rounded-xl transition-all">Masuk</button>
-      <button id="btn-panitia" onclick="switchTab('panitia')" class="min-w-[90px] py-2.5 px-2 text-[11px] font-bold text-gray-500 hover:bg-gray-50 hover:text-gray-700 rounded-xl transition-all">Panitia</button>
-      <button id="btn-riwayat" onclick="switchTab('riwayat')" class="min-w-[90px] py-2.5 px-2 text-[11px] font-bold text-gray-500 hover:bg-gray-50 hover:text-gray-700 rounded-xl transition-all">Riwayat</button>
-      <button id="btn-laporan" onclick="switchTab('laporan')" class="min-w-[90px] py-2.5 px-2 text-[11px] font-bold text-gray-500 hover:bg-gray-50 hover:text-gray-700 rounded-xl transition-all">Cetak</button>
-    </div>
 
     <div class="bca-gradient pt-10 pb-20 px-6 rounded-[2.5rem] shadow-2xl relative overflow-hidden fade-up">
       <div class="absolute -right-10 -top-10 w-40 h-40 bg-white opacity-10 rounded-full"></div>
@@ -269,6 +264,32 @@
     </div>
 
   </div>
+
+  <!-- Bottom Navigation -->
+  <nav id="bottom-nav" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 shadow-2xl z-50">
+    <div class="flex" style="max-width: 600px; margin: 0 auto;">
+      <button id="btn-input" onclick="switchTab('input')" class="flex-1 flex flex-col items-center justify-center py-3 gap-0.5 text-[#003399] transition-all">
+        <i data-lucide="trending-down" class="w-5 h-5"></i>
+        <span class="text-[10px] font-bold">Keluar</span>
+      </button>
+      <button id="btn-pemasukan" onclick="switchTab('pemasukan')" class="flex-1 flex flex-col items-center justify-center py-3 gap-0.5 text-gray-400 transition-all">
+        <i data-lucide="trending-up" class="w-5 h-5"></i>
+        <span class="text-[10px] font-bold">Masuk</span>
+      </button>
+      <button id="btn-panitia" onclick="switchTab('panitia')" class="flex-1 flex flex-col items-center justify-center py-3 gap-0.5 text-gray-400 transition-all">
+        <i data-lucide="users" class="w-5 h-5"></i>
+        <span class="text-[10px] font-bold">Panitia</span>
+      </button>
+      <button id="btn-riwayat" onclick="switchTab('riwayat')" class="flex-1 flex flex-col items-center justify-center py-3 gap-0.5 text-gray-400 transition-all">
+        <i data-lucide="history" class="w-5 h-5"></i>
+        <span class="text-[10px] font-bold">Riwayat</span>
+      </button>
+      <button id="btn-laporan" onclick="switchTab('laporan')" class="flex-1 flex flex-col items-center justify-center py-3 gap-0.5 text-gray-400 transition-all">
+        <i data-lucide="printer" class="w-5 h-5"></i>
+        <span class="text-[10px] font-bold">Cetak</span>
+      </button>
+    </div>
+  </nav>
 
   <!-- Firebase SDK (compat) -->
   <script src="https://www.gstatic.com/firebasejs/12.13.0/firebase-app-compat.js"></script>

@@ -6,6 +6,22 @@
 
 lucide.createIcons();
 
+function applyMenuVisibility() {
+  Api.getAdminConfig().then(res => {
+    if (res.status !== 'success' || !res.data || !res.data.menu) return;
+    const menu = res.data.menu;
+    const map = { keluar: 'input', masuk: 'pemasukan', panitia: 'panitia', riwayat: 'riwayat', cetak: 'laporan' };
+    Object.entries(map).forEach(([key, tabId]) => {
+      if (menu[key] === false) {
+        const btn = document.getElementById('btn-' + tabId);
+        if (btn) btn.style.display = 'none';
+      }
+    });
+  });
+}
+
+applyMenuVisibility();
+
 // ===== DROPDOWN LOADING =====
 function loadDropdowns() {
   Api.getDropdownData().then((res) => {
@@ -57,11 +73,11 @@ function switchTab(tabId) {
   document.getElementById('tab-' + tabId).classList.add('block');
 
   ['input', 'pemasukan', 'panitia', 'riwayat', 'laporan'].forEach(t => {
-    document.getElementById('btn-' + t).className =
-      "min-w-[90px] py-2.5 px-2 text-[11px] font-bold text-gray-500 hover:bg-gray-50 hover:text-gray-700 rounded-xl transition-all";
+    const btn = document.getElementById('btn-' + t);
+    if (btn) btn.className = "flex-1 flex flex-col items-center justify-center py-3 gap-0.5 text-gray-400 transition-all";
   });
-  document.getElementById('btn-' + tabId).className =
-    "min-w-[90px] py-2.5 px-2 text-[11px] font-bold bg-[#e6f0ff] text-[#003399] rounded-xl transition-all shadow-sm";
+  const active = document.getElementById('btn-' + tabId);
+  if (active) active.className = "flex-1 flex flex-col items-center justify-center py-3 gap-0.5 text-[#003399] transition-all";
 
   if (tabId === 'riwayat') fetchRiwayat();
   if (tabId === 'panitia') fetchPanitia();
