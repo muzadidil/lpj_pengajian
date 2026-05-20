@@ -155,6 +155,19 @@
           </div>
         </div>
 
+        <!-- Tambah panitia baru -->
+        <div class="flex items-center gap-2 mb-4">
+          <select id="panitia-nama-sel" class="jabatan-select flex-1 bg-white rounded-xl border border-gray-200 text-sm font-medium text-gray-700 outline-none input-focus">
+            <option value="">-- Pilih Nama --</option>
+          </select>
+          <select id="panitia-jabatan-sel" class="jabatan-select flex-1 bg-white rounded-xl border border-gray-200 text-sm font-medium text-gray-700 outline-none input-focus">
+            <option value="">-- Jabatan --</option>
+          </select>
+          <button onclick="addPanitiaRecord()" class="btn-add bg-purple-600 text-white font-bold rounded-2xl shadow-md btn-bounce">
+            <i data-lucide="plus" class="w-5 h-5"></i>
+          </button>
+        </div>
+
         <!-- Header kolom -->
         <div class="flex items-center gap-2 px-3 mb-2">
           <span class="flex-1 text-[10px] font-bold text-gray-400 uppercase tracking-wider">Nama</span>

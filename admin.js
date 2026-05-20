@@ -77,6 +77,7 @@ async function loadAdminPanel() {
 
   renderMenuSettings();
   renderKategoriList();
+  populatePanitiaSelects();
   renderPanitiaRecords();
   renderPanitiaList();
   renderLpjInfo();
@@ -173,6 +174,34 @@ async function removeKategori(index) {
 }
 
 // ===== PANITIA RECORDS (actual susunan) =====
+function populatePanitiaSelects() {
+  const namaSel = document.getElementById('panitia-nama-sel');
+  const jabatanSel = document.getElementById('panitia-jabatan-sel');
+  if (!namaSel || !jabatanSel) return;
+  const namaList = toArr(masterData.namaPanitia);
+  namaSel.innerHTML = '<option value="">-- Pilih Nama --</option>' +
+    namaList.map(n => `<option value="${n}">${n}</option>`).join('');
+  jabatanSel.innerHTML = '<option value="">-- Jabatan --</option>' +
+    jabatanList.map(j => `<option value="${j}">${j}</option>`).join('');
+}
+
+async function addPanitiaRecord() {
+  const nama = document.getElementById('panitia-nama-sel').value;
+  const jabatan = document.getElementById('panitia-jabatan-sel').value;
+  if (!nama || !jabatan) { showToast('Pilih nama dan jabatan terlebih dahulu', true); return; }
+  const res = await Api.simpanSusunan({ nama, jabatan });
+  if (res.status === 'success') {
+    const pr = await Api.getAllPanitiaRecords();
+    panitiaRecords = pr.data || [];
+    renderPanitiaRecords();
+    document.getElementById('panitia-nama-sel').value = '';
+    document.getElementById('panitia-jabatan-sel').value = '';
+    showToast('Panitia ditambahkan');
+  } else {
+    showToast('Gagal: ' + res.message, true);
+  }
+}
+
 function renderPanitiaRecords() {
   const el = document.getElementById('panitia-records-list');
   if (!panitiaRecords || panitiaRecords.length === 0) {
