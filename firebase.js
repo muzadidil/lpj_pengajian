@@ -282,7 +282,7 @@ const Api = {
         if (!grouped[cat]) grouped[cat] = { total: 0, items: [] };
         grouped[cat].total += nominal;
         grouped[cat].items.push({
-          tanggal: formatTanggal(r.waktu),
+          tanggal: formatTanggalJam(r.waktu),
           keterangan: r.keterangan || '-',
           qty: r.qty || 0,
           satuan: r.satuan || '-',

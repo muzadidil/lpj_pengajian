@@ -425,7 +425,7 @@ function generatePDFLayout(data, qrSrc) {
     html += `
     <table>
       <tr class="bg-cat"><td colspan="6" class="cat-title">${kategori}</td><td class="highlight-total">${formatRp(info.total)}</td></tr>
-      <tr><th style="text-align:center;" width="10%">Tanggal</th><th width="35%">Keterangan</th><th style="text-align:center;" width="12%">Satuan</th><th style="text-align:center;" width="13%">Nominal</th><th width="15%">Nama PJ</th><th width="15%">Jabatan</th></tr>`;
+      <tr><th style="text-align:center;" width="18%">Tanggal &amp; Waktu</th><th width="30%">Keterangan</th><th style="text-align:center;" width="10%">Satuan</th><th style="text-align:center;" width="13%">Nominal</th><th width="15%">Nama PJ</th><th width="14%">Jabatan</th></tr>`;
     info.items.forEach(item => {
       html += `<tr>
         <td style="text-align:center;">${item.tanggal}</td>
